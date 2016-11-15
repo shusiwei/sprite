@@ -4,8 +4,8 @@ var _this = this,
 function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
 /*
- * Helper.js
- * Description : a relaxed javascript library,it relies on jQuery(zepto).
+ * wing.js
+ * Description : A modern JavaScript utility library for browser.
  * Coder : shusiwei
  * Date : 2016-08-22
  * Version : 2.8.22
@@ -13,7 +13,7 @@ function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { t
  * https://github.com/shusiwei/helper
  * Licensed under the MIT license.
  */
-import _ from 'wizard';
+import _ from 'tiny';
 
 var global = window;
 var document = window.document;
@@ -491,7 +491,7 @@ var disableScroll = function () {
   };
 }();
 
-var Sprite = {
+var Wing = {
   is: isType,
   setCookie: setCookie,
   query2json: query2json,
@@ -512,4 +512,4 @@ var Sprite = {
   disableScroll: disableScroll
 };
 
-export default Sprite;
+export default Wing;

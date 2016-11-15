@@ -1,6 +1,6 @@
 /*
- * Helper.js
- * Description : a relaxed javascript library,it relies on jQuery(zepto).
+ * wing.js
+ * Description : A modern JavaScript utility library for browser.
  * Coder : shusiwei
  * Date : 2016-08-22
  * Version : 2.8.22
@@ -8,7 +8,7 @@
  * https://github.com/shusiwei/helper
  * Licensed under the MIT license.
  */
-import _ from 'wizard';
+import _ from 'tiny';
 
 const global = window;
 const document = window.document;
@@ -409,7 +409,7 @@ const disableScroll = (function() {
   };
 })();
 
-const Sprite = {
+const Wing = {
   is: isType,
   setCookie,
   query2json,
@@ -430,4 +430,4 @@ const Sprite = {
   disableScroll
 };
 
-export default Sprite;
+export default Wing;
