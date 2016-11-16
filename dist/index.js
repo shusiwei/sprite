@@ -4,13 +4,13 @@ var _this = this,
 function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
 /*
- * wing.js
+ * tyin-node.js
  * Description : A modern JavaScript utility library for browser.
  * Coder : shusiwei
  * Date : 2016-08-22
- * Version : 2.8.22
+ * Version : 1.0.0
  *
- * https://github.com/shusiwei/helper
+ * https://github.com/shusiwei/tyin-node
  * Licensed under the MIT license.
  */
 import _ from 'tiny';
@@ -491,7 +491,7 @@ var disableScroll = function () {
   };
 }();
 
-var Wing = {
+var $ = {
   is: isType,
   setCookie: setCookie,
   query2json: query2json,
@@ -512,4 +512,4 @@ var Wing = {
   disableScroll: disableScroll
 };
 
-export default Wing;
+export default $;

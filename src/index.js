@@ -1,11 +1,11 @@
 /*
- * wing.js
+ * tyin-node.js
  * Description : A modern JavaScript utility library for browser.
  * Coder : shusiwei
  * Date : 2016-08-22
- * Version : 2.8.22
+ * Version : 1.0.0
  *
- * https://github.com/shusiwei/helper
+ * https://github.com/shusiwei/tyin-node
  * Licensed under the MIT license.
  */
 import _ from 'tiny';
@@ -409,7 +409,7 @@ const disableScroll = (function() {
   };
 })();
 
-const Wing = {
+const $ = {
   is: isType,
   setCookie,
   query2json,
@@ -430,4 +430,4 @@ const Wing = {
   disableScroll
 };
 
-export default Wing;
+export default $;

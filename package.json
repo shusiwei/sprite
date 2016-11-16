@@ -1,5 +1,5 @@
 {
-  "name": "wing",
+  "name": "tiny-node",
   "version": "1.0.0",
   "description": "A modern JavaScript utility library for browser",
   "main": "dist/index.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shusiwei/wing.git"
+    "url": "git+https://github.com/shusiwei/tiny-node.git"
   },
   "author": "shusiwei",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/shusiwei/wing/issues"
+    "url": "https://github.com/shusiwei/tiny-node/issues"
   },
-  "homepage": "https://github.com/shusiwei/wing#readme",
+  "homepage": "https://github.com/shusiwei/tiny-node#readme",
   "devDependencies": {
     "babel-cli": "^6.18.0",
     "babel-core": "^6.13.2",
