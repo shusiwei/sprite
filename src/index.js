@@ -422,24 +422,26 @@ class Sticky {
   updatePosition() {
     console.log(this);
     if (this.checkIsHit()) {
-      this.target.style.position = 'fixed';
-    } else {
       this.target.style.position = this.position;
+    } else {
+      this.target.style.position = 'fixed';
     };
   }
   checkIsHit() {
     const targetRect = this.target.getBoundingClientRect();
     const bodyRect = this.body.getBoundingClientRect();
 
-    return bodyRect.top + bodyRect.height + targetRect.height < window.outerHeight;
+    return Math.abs(bodyRect.top) + bodyRect.height + targetRect.height > window.outerHeight;
   }
   bind() {
-    window.addEventListener('resize', this.updatePosition.bind(this));
-    window.addEventListener('scroll', this.updatePosition.bind(this));
+    this.event = () => this.updatePosition();
+
+    window.addEventListener('resize', this.event);
+    window.addEventListener('scroll', this.event);
   }
   destroy() {
-    window.removeEventListener('resize', this.updatePosition);
-    window.removeEventListener('scroll', this.updatePosition);
+    window.removeEventListener('resize', this.event);
+    window.removeEventListener('scroll', this.event);
   }
 }
 
