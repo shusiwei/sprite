@@ -420,6 +420,7 @@ class Sticky {
     this.updatePosition();
   }
   updatePosition() {
+    console.log(this);
     if (this.checkIsHit()) {
       this.target.style.position = 'fixed';
     } else {
@@ -437,8 +438,8 @@ class Sticky {
     window.addEventListener('scroll', this.updatePosition.bind(this));
   }
   destroy() {
-    window.addEventListener('resize', this.updatePosition);
-    window.addEventListener('scroll', this.updatePosition);
+    window.removeEventListener('resize', this.updatePosition);
+    window.removeEventListener('scroll', this.updatePosition);
   }
 }
 
