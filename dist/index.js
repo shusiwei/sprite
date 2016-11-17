@@ -508,9 +508,9 @@ var Sticky = function () {
 
   Sticky.prototype.updatePosition = function updatePosition() {
     if (this.checkIsHit()) {
-      this.target.style.position = 'fixed';
-    } else {
       this.target.style.position = this.position;
+    } else {
+      this.target.style.position = 'fixed';
     };
   };
 
@@ -518,17 +518,25 @@ var Sticky = function () {
     var targetRect = this.target.getBoundingClientRect();
     var bodyRect = this.body.getBoundingClientRect();
 
-    return bodyRect.top + bodyRect.height + targetRect.height < window.outerHeight;
+    return Math.abs(bodyRect.top) + bodyRect.height + targetRect.height > window.outerHeight;
   };
 
   Sticky.prototype.bind = function bind() {
-    window.addEventListener('resize', this.updatePosition.bind(this));
-    window.addEventListener('scroll', this.updatePosition.bind(this));
+    var _this3 = this;
+
+    this.event = function () {
+      _newArrowCheck(this, _this3);
+
+      return this.updatePosition();
+    }.bind(this);
+
+    window.addEventListener('resize', this.event);
+    window.addEventListener('scroll', this.event);
   };
 
   Sticky.prototype.destroy = function destroy() {
-    window.addEventListener('resize', this.updatePosition);
-    window.addEventListener('scroll', this.updatePosition);
+    window.removeEventListener('resize', this.event);
+    window.removeEventListener('scroll', this.event);
   };
 
   return Sticky;

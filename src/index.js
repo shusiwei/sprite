@@ -420,7 +420,6 @@ class Sticky {
     this.updatePosition();
   }
   updatePosition() {
-    console.log(this);
     if (this.checkIsHit()) {
       this.target.style.position = this.position;
     } else {
