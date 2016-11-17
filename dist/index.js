@@ -1,6 +1,8 @@
 var _this = this,
     _arguments = arguments;
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
 /*
@@ -491,6 +493,47 @@ var disableScroll = function () {
   };
 }();
 
+var Sticky = function () {
+  function Sticky(target, body) {
+    _classCallCheck(this, Sticky);
+
+    this.target = target;
+    this.body = body;
+
+    this.position = getComputedStyle(this.target).position;
+
+    this.bind();
+    this.updatePosition();
+  }
+
+  Sticky.prototype.updatePosition = function updatePosition() {
+    if (this.checkIsHit()) {
+      this.target.style.position = 'fixed';
+    } else {
+      this.target.style.position = this.position;
+    };
+  };
+
+  Sticky.prototype.checkIsHit = function checkIsHit() {
+    var targetRect = this.target.getBoundingClientRect();
+    var bodyRect = this.body.getBoundingClientRect();
+
+    return bodyRect.top + bodyRect.height + targetRect.height < window.outerHeight;
+  };
+
+  Sticky.prototype.bind = function bind() {
+    window.addEventListener('resize', this.updatePosition.bind(this));
+    window.addEventListener('scroll', this.updatePosition.bind(this));
+  };
+
+  Sticky.prototype.destroy = function destroy() {
+    window.addEventListener('resize', this.updatePosition);
+    window.addEventListener('scroll', this.updatePosition);
+  };
+
+  return Sticky;
+}();
+
 var $ = {
   is: isType,
   setCookie: setCookie,
@@ -509,7 +552,9 @@ var $ = {
   rem2px: rem2px,
   htmlpx2rem: htmlpx2rem,
   autoRootEM: autoRootEM,
-  disableScroll: disableScroll
+  disableScroll: disableScroll,
+  Sticky: Sticky
 };
 
 export default $;
+export { Sticky };

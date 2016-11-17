@@ -409,6 +409,39 @@ const disableScroll = (function() {
   };
 })();
 
+class Sticky {
+  constructor(target, body) {
+    this.target = target;
+    this.body = body;
+
+    this.position = getComputedStyle(this.target).position;
+
+    this.bind();
+    this.updatePosition();
+  }
+  updatePosition() {
+    if (this.checkIsHit()) {
+      this.target.style.position = 'fixed';
+    } else {
+      this.target.style.position = this.position;
+    };
+  }
+  checkIsHit() {
+    const targetRect = this.target.getBoundingClientRect();
+    const bodyRect = this.body.getBoundingClientRect();
+
+    return bodyRect.top + bodyRect.height + targetRect.height < window.outerHeight;
+  }
+  bind() {
+    window.addEventListener('resize', this.updatePosition.bind(this));
+    window.addEventListener('scroll', this.updatePosition.bind(this));
+  }
+  destroy() {
+    window.addEventListener('resize', this.updatePosition);
+    window.addEventListener('scroll', this.updatePosition);
+  }
+}
+
 const $ = {
   is: isType,
   setCookie,
@@ -427,7 +460,9 @@ const $ = {
   rem2px,
   htmlpx2rem,
   autoRootEM,
-  disableScroll
+  disableScroll,
+  Sticky
 };
 
 export default $;
+export {Sticky};
