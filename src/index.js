@@ -8,19 +8,18 @@
  * https://github.com/shusiwei/tyin-node
  * Licensed under the MIT license.
  */
-import _ from 'tiny';
+import {isNumber, isPlainObject, isString, isArray, includes, forEach} from 'tiny';
 
 const global = window;
 const document = window.document;
 const html = document.documentElement;
-const regex = {
-  nickname: '^[\u4E00-\u9FA5a-zA-Z]{2,15}$',
-  cell: '^(13[0-9]{9}|15[012356789][0-9]{8}|18[0-9][0-9]{8}|14[57][0-9]{8}|17[01678][0-9]{8})$',
-  tel: '^(0\\d{2,3})?(\\d{7,8})$',
-  email: '^\\w+((-\\w+)|(\\.\\w+))*\\@[A-Za-z0-9]+((\\.|-)[A-Za-z0-9]+)*\\.[A-Za-z0-9]+$',
-  integer: '^\\d+$',
-  chinese: '^[\\u4E00-\\u9FA5]+$'
-};
+
+const createElement = function(tagName) {
+  return this.createElement(tagName);
+}.bind(document);
+const getComputedStyle = function(target, pseudo) {
+  return this.getComputedStyle(target, pseudo);
+}.bind(global);
 
 const isType = (function(regex) {
   return function(type, obj) {
@@ -29,9 +28,8 @@ const isType = (function(regex) {
       case 'cell' :
       case 'tel' :
       case 'email' :
-      case 'integer' :
       case 'chinese' :
-        return _.isString(obj) && regex[type].test(obj);
+        return isString(obj) && regex[type].test(obj);
 
       case 'phone' :
         return regex['tel'].test(obj) && regex['cell'].test(obj);
@@ -41,25 +39,17 @@ const isType = (function(regex) {
     }
   };
 })({
-  nickname: new RegExp(regex.nickname),
-  cell: new RegExp(regex.cell),
-  tel: new RegExp(regex.tel),
-  email: new RegExp(regex.email),
-  integer: new RegExp(regex.integer),
-  chinese: new RegExp(regex.chinese)
+  nickname: /^[\u4E00-\u9FA5a-zA-Z]{2,15}$/,
+  cell: /^(13[0-9]{9}|15[012356789][0-9]{8}|18[0-9][0-9]{8}|14[57][0-9]{8}|17[01678][0-9]{8})$/,
+  tel: /^(0\d{2,3})?(\d{7,8})$/,
+  email: /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/,
+  chinese: /^[\u4E00-\u9FA5]+$/
 });
-
-const createElement = function(tagName) {
-  return this.createElement(tagName);
-}.bind(document);
-const getComputedStyle = function(target, pseudo) {
-  return this.getComputedStyle(target, pseudo);
-}.bind(global);
 
 const setCookie = (name, value, exp, options) => {
   let cookie = '';
 
-  if (_.isNumber(exp)) {
+  if (isNumber(exp)) {
     let date = new Date();
     date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
 
@@ -68,7 +58,7 @@ const setCookie = (name, value, exp, options) => {
     cookie += name + '=' + value + ';';
   };
 
-  if (_.isObject(options)) {
+  if (isPlainObject(options)) {
     if (options.path) cookie += ';path=' + options.path;
     if (options.domain) cookie += ';domain=' + options.domain;
     if (options.secure) cookie += ';domain=' + options.secure;
@@ -86,9 +76,9 @@ const query2json = () => {
   // 如果queryStr不符合query的格式但符合key的格式，那么queryStr就代表key
   switch (arguments.length) {
     case 1 :
-      if (_.isString(arguments[0]) && _.includes(arguments[0], '=')) {
+      if (isString(arguments[0]) && includes(arguments[0], '=')) {
         queryStr = arguments[0];
-      } else if (_.isArray(arguments[0]) || (_.isString(arguments[0]) && !_.includes(arguments[0], '='))) {
+      } else if (isArray(arguments[0]) || (isString(arguments[0]) && !includes(arguments[0], '='))) {
         queryKey = arguments[0];
       };
 
@@ -101,7 +91,7 @@ const query2json = () => {
       break;
   };
 
-  if (!queryStr || !_.includes(queryStr, '=')) return null;
+  if (!queryStr || !includes(queryStr, '=')) return null;
 
   let data = Object.defineProperty({}, 'length', {
     value: 0,
@@ -109,7 +99,7 @@ const query2json = () => {
     enumerable: false
   });
 
-  _.forEach(queryStr.split('&'), function(param, index) {
+  forEach(queryStr.split('&'), function(param, index) {
     let paramArr = param.split('=');
     if (paramArr.length === 2) {
       data[paramArr[0]] = paramArr[1];
@@ -117,11 +107,11 @@ const query2json = () => {
     };
   });
 
-  if (_.isString(queryKey)) {
+  if (isString(queryKey)) {
     return data[queryKey];
-  } else if (_.isArray(queryKey)) {
+  } else if (isArray(queryKey)) {
     return (function(keyArr, result) {
-      _.forEach(keyArr, function(name, index) {
+      forEach(keyArr, function(name, index) {
         result[name] = data[name];
         result.length ++;
       });
@@ -140,17 +130,17 @@ const query2json = () => {
 const cookie2json = (key) => {
   let cookie = document.cookie;
 
-  if (!cookie || !_.includes(cookie, '=')) return null;
+  if (!cookie || !includes(cookie, '=')) return null;
 
   return query2json(cookie.replace(/; /g, '&'), key);
 };
 
 const formatStr = (str, pattern = 4, maxLength, separator = ' ') => {
-  if (!_.isString(str)) return '';
+  if (!isString(str)) return '';
 
   let text = '';
 
-  if (_.isString(pattern)) {
+  if (isString(pattern)) {
     const patternArr = pattern.split('');
     const patternLen = pattern.length - pattern.match(/;/g).length;
 
@@ -164,8 +154,8 @@ const formatStr = (str, pattern = 4, maxLength, separator = ' ') => {
 
       if (i === patternLen - 1) break;
     };
-  } else if (_.isNumber(pattern)) {
-    if (!_.isNumber(maxLength) || maxLength < 1) return;
+  } else if (isNumber(pattern)) {
+    if (!isNumber(maxLength) || maxLength < 1) return;
 
     for (let i = 0; i < str.length; i++) {
       if (i > 0 && i % pattern === 0) text += separator;
@@ -183,11 +173,9 @@ const getDate = (function() {
   // 周
   const weekArr = ['日', '一', '二', '三', '四', '五', '六'];
 
-  const dateFixed = function(number, fix) {
-    return ('0' + (number + fix)).slice(-2);
-  };
+  const dateFixed = (number, fix) => ('0' + (number + fix)).slice(-2);
 
-  const getDateArr = function(year, month, date, days, array) {
+  const getDateArr = (year, month, date, days, array) => {
     // 每个月多少天
     const nowDays = [31, year % 4 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     // 明年
@@ -205,7 +193,7 @@ const getDate = (function() {
     return array;
   };
 
-  const pushDay = function(dateArr, weekStart) {
+  const pushDay = (dateArr, weekStart) => {
     for (let i = 0, length = dateArr.length; i < length; i++) {
       let index = (weekStart + i) % 7;
       dateArr[i].push(weekArr[index], index);
@@ -214,7 +202,7 @@ const getDate = (function() {
     return dateArr;
   };
 
-  return function() {
+  return () => {
     let nowDate;
 
     if (arguments.length === 1) {
@@ -272,13 +260,13 @@ const UA = (function() {
     },
     isBrowser: (function() {
       let index = {
-        wechat: _.indexOf(ua, 'micromessenger'),
-        qq: _.indexOf(ua, 'qq'),
-        mqq: _.indexOf(ua, 'mqqbrowser'),
-        uc: _.indexOf(ua, 'ucbrowser'),
-        safari: _.indexOf(ua, 'safari'),
-        chrome: _.indexOf(ua, 'chrome'),
-        firefox: _.indexOf(ua, 'firefox')
+        wechat: indexOf(ua, 'micromessenger'),
+        qq: indexOf(ua, 'qq'),
+        mqq: indexOf(ua, 'mqqbrowser'),
+        uc: indexOf(ua, 'ucbrowser'),
+        safari: indexOf(ua, 'safari'),
+        chrome: indexOf(ua, 'chrome'),
+        firefox: indexOf(ua, 'firefox')
       };
 
       return function(name) {
@@ -302,8 +290,6 @@ const UA = (function() {
   };
 })();
 
-const isPageBottom = (threshold) => document.documentElement.offsetHeight - global.pageYOffset - global.outerHeight <= (_.isNumber(threshold) ? threshold : 0);
-
 const isChildNode = (childNode, parentNode) => {
   if (childNode === parentNode) return true;
   let target = childNode;
@@ -319,16 +305,16 @@ const isChildNode = (childNode, parentNode) => {
   return false;
 };
 
-const px2rem = (px) => parseFloat(px) / parseInt(getComputedStyle(html, ':root').fontSize) + 'rem';
+const px2rem = (value) => parseFloat(value) / parseInt(getComputedStyle(html, ':root').fontSize) + 'rem';
 
-const rem2px = (rem) => parseFloat(rem) * parseInt(getComputedStyle(html, ':root').fontSize);
+const rem2px = (value) => parseFloat(value) * parseInt(getComputedStyle(html, ':root').fontSize);
 
 const htmlpx2rem = (function() {
   const styleRegex = /style="([^"]+)"/ig;
   const classRegex = /class="([^"]+)"/ig;
 
   return function(html) {
-    if (!_.isString(html)) return html;
+    if (!isString(html)) return html;
 
     const beforeArr = html.match(styleRegex);
     const afterArr = [];
@@ -344,7 +330,7 @@ const htmlpx2rem = (function() {
         let tempStr = '';
 
         for (let styleRule of tempArry) {
-          if (styleRule && _.includes(styleRule, ':')) tempStr += styleRule.trim().toLowerCase().replace(': ', ':') + ';';
+          if (styleRule && includes(styleRule, ':')) tempStr += styleRule.trim().toLowerCase().replace(': ', ':') + ';';
         };
 
         afterArr.push('style="' + tempStr + '"');
@@ -456,7 +442,6 @@ const $ = {
     query: query2json(),
     path: location.href.split('//')[1].toLowerCase().split('/')
   },
-  isPageBottom,
   isChildNode,
   px2rem,
   rem2px,
