@@ -8,7 +8,7 @@
  * https://github.com/shusiwei/tyin-node
  * Licensed under the MIT license.
  */
-import {isNumber, isPlainObject, isString, isArray, includes, forEach} from 'tiny';
+import {isNumber, isPlainObject, isString, isArray, includes, forEach, indexOf} from 'tiny';
 
 const global = window;
 const document = window.document;
@@ -42,7 +42,7 @@ const isType = (function(regex) {
   nickname: /^[\u4E00-\u9FA5a-zA-Z]{2,15}$/,
   cell: /^(13[0-9]{9}|15[012356789][0-9]{8}|18[0-9][0-9]{8}|14[57][0-9]{8}|17[01678][0-9]{8})$/,
   tel: /^(0\d{2,3})?(\d{7,8})$/,
-  email: /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/,
+  email: /^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/,
   chinese: /^[\u4E00-\u9FA5]+$/
 });
 

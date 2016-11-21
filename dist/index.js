@@ -15,19 +15,18 @@ function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { t
  * https://github.com/shusiwei/tyin-node
  * Licensed under the MIT license.
  */
-import _ from 'tiny';
+import { isNumber, isPlainObject, isString, isArray, includes, forEach, indexOf } from 'tiny';
 
 var global = window;
 var document = window.document;
 var html = document.documentElement;
-var regex = {
-  nickname: '^[\u4E00-\u9FA5a-zA-Z]{2,15}$',
-  cell: '^(13[0-9]{9}|15[012356789][0-9]{8}|18[0-9][0-9]{8}|14[57][0-9]{8}|17[01678][0-9]{8})$',
-  tel: '^(0\\d{2,3})?(\\d{7,8})$',
-  email: '^\\w+((-\\w+)|(\\.\\w+))*\\@[A-Za-z0-9]+((\\.|-)[A-Za-z0-9]+)*\\.[A-Za-z0-9]+$',
-  integer: '^\\d+$',
-  chinese: '^[\\u4E00-\\u9FA5]+$'
-};
+
+var createElement = function (tagName) {
+  return this.createElement(tagName);
+}.bind(document);
+var getComputedStyle = function (target, pseudo) {
+  return this.getComputedStyle(target, pseudo);
+}.bind(global);
 
 var isType = function (regex) {
   return function (type, obj) {
@@ -36,9 +35,8 @@ var isType = function (regex) {
       case 'cell':
       case 'tel':
       case 'email':
-      case 'integer':
       case 'chinese':
-        return _.isString(obj) && regex[type].test(obj);
+        return isString(obj) && regex[type].test(obj);
 
       case 'phone':
         return regex['tel'].test(obj) && regex['cell'].test(obj);
@@ -48,27 +46,19 @@ var isType = function (regex) {
     }
   };
 }({
-  nickname: new RegExp(regex.nickname),
-  cell: new RegExp(regex.cell),
-  tel: new RegExp(regex.tel),
-  email: new RegExp(regex.email),
-  integer: new RegExp(regex.integer),
-  chinese: new RegExp(regex.chinese)
+  nickname: /^[\u4E00-\u9FA5a-zA-Z]{2,15}$/,
+  cell: /^(13[0-9]{9}|15[012356789][0-9]{8}|18[0-9][0-9]{8}|14[57][0-9]{8}|17[01678][0-9]{8})$/,
+  tel: /^(0\d{2,3})?(\d{7,8})$/,
+  email: /^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/,
+  chinese: /^[\u4E00-\u9FA5]+$/
 });
-
-var createElement = function (tagName) {
-  return this.createElement(tagName);
-}.bind(document);
-var getComputedStyle = function (target, pseudo) {
-  return this.getComputedStyle(target, pseudo);
-}.bind(global);
 
 var setCookie = function (name, value, exp, options) {
   _newArrowCheck(this, _this);
 
   var cookie = '';
 
-  if (_.isNumber(exp)) {
+  if (isNumber(exp)) {
     var date = new Date();
     date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
 
@@ -77,7 +67,7 @@ var setCookie = function (name, value, exp, options) {
     cookie += name + '=' + value + ';';
   };
 
-  if (_.isObject(options)) {
+  if (isPlainObject(options)) {
     if (options.path) cookie += ';path=' + options.path;
     if (options.domain) cookie += ';domain=' + options.domain;
     if (options.secure) cookie += ';domain=' + options.secure;
@@ -97,9 +87,9 @@ var query2json = function () {
   // 如果queryStr不符合query的格式但符合key的格式，那么queryStr就代表key
   switch (_arguments.length) {
     case 1:
-      if (_.isString(_arguments[0]) && _.includes(_arguments[0], '=')) {
+      if (isString(_arguments[0]) && includes(_arguments[0], '=')) {
         queryStr = _arguments[0];
-      } else if (_.isArray(_arguments[0]) || _.isString(_arguments[0]) && !_.includes(_arguments[0], '=')) {
+      } else if (isArray(_arguments[0]) || isString(_arguments[0]) && !includes(_arguments[0], '=')) {
         queryKey = _arguments[0];
       };
 
@@ -112,7 +102,7 @@ var query2json = function () {
       break;
   };
 
-  if (!queryStr || !_.includes(queryStr, '=')) return null;
+  if (!queryStr || !includes(queryStr, '=')) return null;
 
   var data = Object.defineProperty({}, 'length', {
     value: 0,
@@ -120,7 +110,7 @@ var query2json = function () {
     enumerable: false
   });
 
-  _.forEach(queryStr.split('&'), function (param, index) {
+  forEach(queryStr.split('&'), function (param, index) {
     var paramArr = param.split('=');
     if (paramArr.length === 2) {
       data[paramArr[0]] = paramArr[1];
@@ -128,11 +118,11 @@ var query2json = function () {
     };
   });
 
-  if (_.isString(queryKey)) {
+  if (isString(queryKey)) {
     return data[queryKey];
-  } else if (_.isArray(queryKey)) {
+  } else if (isArray(queryKey)) {
     return function (keyArr, result) {
-      _.forEach(keyArr, function (name, index) {
+      forEach(keyArr, function (name, index) {
         result[name] = data[name];
         result.length++;
       });
@@ -153,7 +143,7 @@ var cookie2json = function (key) {
 
   var cookie = document.cookie;
 
-  if (!cookie || !_.includes(cookie, '=')) return null;
+  if (!cookie || !includes(cookie, '=')) return null;
 
   return query2json(cookie.replace(/; /g, '&'), key);
 }.bind(this);
@@ -165,11 +155,11 @@ var formatStr = function (str) {
 
   _newArrowCheck(this, _this);
 
-  if (!_.isString(str)) return '';
+  if (!isString(str)) return '';
 
   var text = '';
 
-  if (_.isString(pattern)) {
+  if (isString(pattern)) {
     var patternArr = pattern.split('');
     var patternLen = pattern.length - pattern.match(/;/g).length;
 
@@ -183,8 +173,8 @@ var formatStr = function (str) {
 
       if (i === patternLen - 1) break;
     };
-  } else if (_.isNumber(pattern)) {
-    if (!_.isNumber(maxLength) || maxLength < 1) return;
+  } else if (isNumber(pattern)) {
+    if (!isNumber(maxLength) || maxLength < 1) return;
 
     for (var _i = 0; _i < str.length; _i++) {
       if (_i > 0 && _i % pattern === 0) text += separator;
@@ -199,14 +189,21 @@ var formatStr = function (str) {
 }.bind(this);
 
 var getDate = function () {
+  var _this2 = this,
+      _arguments2 = arguments;
+
   // 周
   var weekArr = ['日', '一', '二', '三', '四', '五', '六'];
 
-  var dateFixed = function dateFixed(number, fix) {
-    return ('0' + (number + fix)).slice(-2);
-  };
+  var dateFixed = function (number, fix) {
+    _newArrowCheck(this, _this2);
 
-  var getDateArr = function getDateArr(year, month, date, days, array) {
+    return ('0' + (number + fix)).slice(-2);
+  }.bind(this);
+
+  var getDateArr = function (year, month, date, days, array) {
+    _newArrowCheck(this, _this2);
+
     // 每个月多少天
     var nowDays = [31, year % 4 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     // 明年
@@ -222,30 +219,34 @@ var getDate = function () {
     if (days > 0) getDateArr(nextMonth === 0 ? nextYear : year, nextMonth, 1, days, array);
 
     return array;
-  };
+  }.bind(this);
 
-  var pushDay = function pushDay(dateArr, weekStart) {
+  var pushDay = function (dateArr, weekStart) {
+    _newArrowCheck(this, _this2);
+
     for (var i = 0, length = dateArr.length; i < length; i++) {
       var index = (weekStart + i) % 7;
       dateArr[i].push(weekArr[index], index);
     };
 
     return dateArr;
-  };
+  }.bind(this);
 
   return function () {
+    _newArrowCheck(this, _this2);
+
     var nowDate = void 0;
 
-    if (arguments.length === 1) {
+    if (_arguments2.length === 1) {
       // 获取当前时间
       nowDate = new Date();
-    } else if (arguments.length === 2) {
+    } else if (_arguments2.length === 2) {
       // 自定义开始时间
-      nowDate = new Date(arguments[1].toString());
+      nowDate = new Date(_arguments2[1].toString());
     };
 
-    return pushDay(getDateArr(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), arguments[0], []), nowDate.getDay());
-  };
+    return pushDay(getDateArr(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), _arguments2[0], []), nowDate.getDay());
+  }.bind(this);
 }();
 
 var UA = function () {
@@ -291,13 +292,13 @@ var UA = function () {
     },
     isBrowser: function () {
       var index = {
-        wechat: _.indexOf(ua, 'micromessenger'),
-        qq: _.indexOf(ua, 'qq'),
-        mqq: _.indexOf(ua, 'mqqbrowser'),
-        uc: _.indexOf(ua, 'ucbrowser'),
-        safari: _.indexOf(ua, 'safari'),
-        chrome: _.indexOf(ua, 'chrome'),
-        firefox: _.indexOf(ua, 'firefox')
+        wechat: indexOf(ua, 'micromessenger'),
+        qq: indexOf(ua, 'qq'),
+        mqq: indexOf(ua, 'mqqbrowser'),
+        uc: indexOf(ua, 'ucbrowser'),
+        safari: indexOf(ua, 'safari'),
+        chrome: indexOf(ua, 'chrome'),
+        firefox: indexOf(ua, 'firefox')
       };
 
       return function (name) {
@@ -321,12 +322,6 @@ var UA = function () {
   };
 }();
 
-var isPageBottom = function (threshold) {
-  _newArrowCheck(this, _this);
-
-  return document.documentElement.offsetHeight - global.pageYOffset - global.outerHeight <= (_.isNumber(threshold) ? threshold : 0);
-}.bind(this);
-
 var isChildNode = function (childNode, parentNode) {
   _newArrowCheck(this, _this);
 
@@ -344,16 +339,16 @@ var isChildNode = function (childNode, parentNode) {
   return false;
 }.bind(this);
 
-var px2rem = function (px) {
+var px2rem = function (value) {
   _newArrowCheck(this, _this);
 
-  return parseFloat(px) / parseInt(getComputedStyle(html, ':root').fontSize) + 'rem';
+  return parseFloat(value) / parseInt(getComputedStyle(html, ':root').fontSize) + 'rem';
 }.bind(this);
 
-var rem2px = function (rem) {
+var rem2px = function (value) {
   _newArrowCheck(this, _this);
 
-  return parseFloat(rem) * parseInt(getComputedStyle(html, ':root').fontSize);
+  return parseFloat(value) * parseInt(getComputedStyle(html, ':root').fontSize);
 }.bind(this);
 
 var htmlpx2rem = function () {
@@ -361,7 +356,7 @@ var htmlpx2rem = function () {
   var classRegex = /class="([^"]+)"/ig;
 
   return function (html) {
-    if (!_.isString(html)) return html;
+    if (!isString(html)) return html;
 
     var beforeArr = html.match(styleRegex);
     var afterArr = [];
@@ -403,7 +398,7 @@ var htmlpx2rem = function () {
 
           var styleRule = _ref2;
 
-          if (styleRule && _.includes(styleRule, ':')) tempStr += styleRule.trim().toLowerCase().replace(': ', ':') + ';';
+          if (styleRule && includes(styleRule, ':')) tempStr += styleRule.trim().toLowerCase().replace(': ', ':') + ';';
         };
 
         afterArr.push('style="' + tempStr + '"');
@@ -467,10 +462,10 @@ var autoRootEM = function (scale) {
 }.bind(this);
 
 var disableScroll = function () {
-  var _this2 = this;
+  var _this3 = this;
 
   var preventEvent = function (evt) {
-    _newArrowCheck(this, _this2);
+    _newArrowCheck(this, _this3);
 
     if (evt.type === 'keydown' && evt.keyCode >= 33 && evt.keyCode <= 40 || evt.type === 'touchmove' || evt.type === 'mousewheel') evt.preventDefault();
   }.bind(this);
@@ -522,10 +517,10 @@ var Sticky = function () {
   };
 
   Sticky.prototype.bind = function bind() {
-    var _this3 = this;
+    var _this4 = this;
 
     this.event = function () {
-      _newArrowCheck(this, _this3);
+      _newArrowCheck(this, _this4);
 
       return this.updatePosition();
     }.bind(this);
@@ -554,7 +549,6 @@ var $ = {
     query: query2json(),
     path: location.href.split('//')[1].toLowerCase().split('/')
   },
-  isPageBottom: isPageBottom,
   isChildNode: isChildNode,
   px2rem: px2rem,
   rem2px: rem2px,
