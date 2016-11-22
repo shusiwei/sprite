@@ -555,10 +555,6 @@ var $ = {
   formatStr: formatStr,
   getDate: getDate,
   UA: UA,
-  host: {
-    query: query2json(),
-    path: location.href.split('//')[1].toLowerCase().split('/')
-  },
   isChildNode: isChildNode,
   px2rem: px2rem,
   rem2px: rem2px,
@@ -569,4 +565,4 @@ var $ = {
 };
 
 export default $;
-export { Sticky };
+export { isType, setCookie, query2json, cookie2json, formatStr, getDate, UA, isChildNode, px2rem, htmlpx2rem, autoRootEM, disableScroll, Sticky };

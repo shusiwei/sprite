@@ -436,10 +436,6 @@ const $ = {
   formatStr,
   getDate,
   UA,
-  host: {
-    query: query2json(),
-    path: location.href.split('//')[1].toLowerCase().split('/')
-  },
   isChildNode,
   px2rem,
   rem2px,
@@ -450,4 +446,4 @@ const $ = {
 };
 
 export default $;
-export {Sticky};
+export {isType, setCookie, query2json, cookie2json, formatStr, getDate, UA, isChildNode, px2rem, htmlpx2rem, autoRootEM, disableScroll, Sticky};
