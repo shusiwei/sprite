@@ -52,6 +52,90 @@ var isType = function (regex) {
   chinese: /^[\u4E00-\u9FA5]+$/
 });
 
+/**
+ * @name 将一个对象序列化为一个queryString字符串
+ *
+ * @params {Object} source 操作的对象
+ *
+ * @return {String} queryString字符串
+ */
+var serialize = function (source) {
+  _newArrowCheck(this, _this);
+
+  if (!isPlainObject(source)) throw new TypeError('source must b a plain Object');
+
+  var result = [];
+
+  for (var key in source) {
+    if (source[key] !== undefined) result.push(key + '=' + source[key]);
+  };
+
+  return result.join('&');
+}.bind(this);
+
+/**
+ * @name 将一个queryString字符串转化成一个对象
+ *
+ * @params {String} source 操作的对象
+ * @params {String} keys 需要返回值的key
+ *
+ * @return {Object} 当keys参数为空时，返回该对象，当keys参数只有一个时，则返回该对象中key为此参数的值，当keys参数有多个时，则以一个对象的形式返回该对象所有keys中的参数的值
+ */
+var queryParse = function (source) {
+  for (var _len = arguments.length, keys = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    keys[_key - 1] = arguments[_key];
+  }
+
+  _newArrowCheck(this, _this);
+
+  if (!isString(source)) throw new TypeError('source must b a String');
+
+  var result = {};
+
+  forEach(source.split('&'), function (string) {
+    _newArrowCheck(this, _this);
+
+    var item = string.split('=');
+
+    result[item[0]] = item[1];
+  }.bind(this));
+
+  if (keys.length === 0) return result;
+  if (keys.length === 1) return result[keys[0]];
+
+  var dump = {};
+
+  forEach(keys, function (key) {
+    _newArrowCheck(this, _this);
+
+    dump[key] = result[key];
+  }.bind(this));
+
+  return dump;
+}.bind(this);
+
+/**
+ * @name 将cookie字符串转化成一个对象
+ *
+ * @params {String} source 操作的对象
+ * @params {String} keys 需要返回值的key
+ *
+ * @return {Object} 当keys参数为空时，返回该对象，当keys参数只有一个时，则返回该对象中key为此参数的值，当keys参数有多个时，则以一个对象的形式返回该对象所有keys中的参数的值
+ */
+var cookieParse = function () {
+  for (var _len2 = arguments.length, keys = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    keys[_key2] = arguments[_key2];
+  }
+
+  _newArrowCheck(this, _this);
+
+  var cookie = document.cookie;
+
+  if (!cookie || !includes(cookie, '=')) return null;
+
+  return queryParse.apply(undefined, [cookie.replace(/; /g, '&')].concat(keys));
+}.bind(this);
+
 var setCookie = function (name, value, exp, options) {
   _newArrowCheck(this, _this);
 
@@ -79,6 +163,8 @@ var setCookie = function (name, value, exp, options) {
 
 var query2json = function () {
   _newArrowCheck(this, _this);
+
+  console.warn('query2json method deprecated, plase use queryParse method');
 
   var queryStr = global.location.search.split('?').pop();
   var queryKey = void 0;
@@ -140,11 +226,13 @@ var query2json = function () {
 var cookie2json = function (key) {
   _newArrowCheck(this, _this);
 
+  console.warn('cookie2json method deprecated, plase use cookieParse method');
+
   var cookie = document.cookie;
 
   if (!cookie || !includes(cookie, '=')) return null;
 
-  return query2json(cookie.replace(/; /g, '&'), key);
+  return queryParse(cookie.replace(/; /g, '&'), key);
 }.bind(this);
 
 var formatStr = function (str) {
@@ -153,6 +241,8 @@ var formatStr = function (str) {
   var separator = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : ' ';
 
   _newArrowCheck(this, _this);
+
+  console.warn('formatStr method deprecated, plase use separate method from tiny.js');
 
   if (!isString(str)) return '';
 
@@ -231,8 +321,8 @@ var getDate = function () {
   }.bind(this);
 
   return function () {
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
+    for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+      args[_key3] = arguments[_key3];
     }
 
     _newArrowCheck(this, _this2);
@@ -565,4 +655,4 @@ var $ = {
 };
 
 export default $;
-export { isType, setCookie, query2json, cookie2json, formatStr, getDate, UA, isChildNode, px2rem, htmlpx2rem, autoRootEM, disableScroll, Sticky };
+export { isType, setCookie, query2json, cookie2json, formatStr, getDate, UA, isChildNode, px2rem, htmlpx2rem, autoRootEM, disableScroll, Sticky, serialize, queryParse, cookieParse };

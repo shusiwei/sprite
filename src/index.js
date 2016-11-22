@@ -46,6 +46,72 @@ const isType = (function(regex) {
   chinese: /^[\u4E00-\u9FA5]+$/
 });
 
+/**
+ * @name 将一个对象序列化为一个queryString字符串
+ *
+ * @params {Object} source 操作的对象
+ *
+ * @return {String} queryString字符串
+ */
+const serialize = (source) => {
+  if (!isPlainObject(source)) throw new TypeError('source must b a plain Object');
+
+  const result = [];
+
+  for (let key in source) {
+    if (source[key] !== undefined) result.push(key + '=' + source[key]);
+  };
+
+  return result.join('&');
+};
+
+/**
+ * @name 将一个queryString字符串转化成一个对象
+ *
+ * @params {String} source 操作的对象
+ * @params {String} keys 需要返回值的key
+ *
+ * @return {Object} 当keys参数为空时，返回该对象，当keys参数只有一个时，则返回该对象中key为此参数的值，当keys参数有多个时，则以一个对象的形式返回该对象所有keys中的参数的值
+ */
+const queryParse = (source, ...keys) => {
+  if (!isString(source)) throw new TypeError('source must b a String');
+
+  const result = {};
+
+  forEach(source.split('&'), string => {
+    const item = string.split('=');
+
+    result[item[0]] = item[1];
+  });
+
+  if (keys.length === 0) return result;
+  if (keys.length === 1) return result[keys[0]];
+
+  const dump = {};
+
+  forEach(keys, key => {
+    dump[key] = result[key];
+  });
+
+  return dump;
+};
+
+/**
+ * @name 将cookie字符串转化成一个对象
+ *
+ * @params {String} source 操作的对象
+ * @params {String} keys 需要返回值的key
+ *
+ * @return {Object} 当keys参数为空时，返回该对象，当keys参数只有一个时，则返回该对象中key为此参数的值，当keys参数有多个时，则以一个对象的形式返回该对象所有keys中的参数的值
+ */
+const cookieParse = (...keys) => {
+  const cookie = document.cookie;
+
+  if (!cookie || !includes(cookie, '=')) return null;
+
+  return queryParse(cookie.replace(/; /g, '&'), ...keys);
+};
+
 const setCookie = (name, value, exp, options) => {
   let cookie = '';
 
@@ -70,6 +136,8 @@ const setCookie = (name, value, exp, options) => {
 };
 
 const query2json = (...args) => {
+  console.warn('query2json method deprecated, plase use queryParse method');
+
   let queryStr = global.location.search.split('?').pop();
   let queryKey;
 
@@ -128,14 +196,18 @@ const query2json = (...args) => {
 };
 
 const cookie2json = (key) => {
+  console.warn('cookie2json method deprecated, plase use cookieParse method');
+
   let cookie = document.cookie;
 
   if (!cookie || !includes(cookie, '=')) return null;
 
-  return query2json(cookie.replace(/; /g, '&'), key);
+  return queryParse(cookie.replace(/; /g, '&'), key);
 };
 
 const formatStr = (str, pattern = 4, maxLength, separator = ' ') => {
+  console.warn('formatStr method deprecated, plase use separate method from tiny.js');
+
   if (!isString(str)) return '';
 
   let text = '';
@@ -446,4 +518,4 @@ const $ = {
 };
 
 export default $;
-export {isType, setCookie, query2json, cookie2json, formatStr, getDate, UA, isChildNode, px2rem, htmlpx2rem, autoRootEM, disableScroll, Sticky};
+export {isType, setCookie, query2json, cookie2json, formatStr, getDate, UA, isChildNode, px2rem, htmlpx2rem, autoRootEM, disableScroll, Sticky, serialize, queryParse, cookieParse};
