@@ -69,24 +69,24 @@ const setCookie = (name, value, exp, options) => {
   return cookie2json(name);
 };
 
-const query2json = () => {
+const query2json = (...args) => {
   let queryStr = global.location.search.split('?').pop();
   let queryKey;
 
   // 如果queryStr不符合query的格式但符合key的格式，那么queryStr就代表key
-  switch (arguments.length) {
+  switch (args.length) {
     case 1 :
-      if (isString(arguments[0]) && includes(arguments[0], '=')) {
-        queryStr = arguments[0];
-      } else if (isArray(arguments[0]) || (isString(arguments[0]) && !includes(arguments[0], '='))) {
-        queryKey = arguments[0];
+      if (isString(args[0]) && includes(args[0], '=')) {
+        queryStr = args[0];
+      } else if (isArray(args[0]) || (isString(args[0]) && !includes(args[0], '='))) {
+        queryKey = args[0];
       };
 
       break;
 
     case 2 :
-      queryStr = arguments[0];
-      queryKey = arguments[1];
+      queryStr = args[0];
+      queryKey = args[1];
 
       break;
   };
@@ -202,18 +202,18 @@ const getDate = (function() {
     return dateArr;
   };
 
-  return () => {
+  return (...args) => {
     let nowDate;
 
-    if (arguments.length === 1) {
+    if (args.length === 1) {
       // 获取当前时间
       nowDate = new Date();
-    } else if (arguments.length === 2) {
+    } else if (args.length === 2) {
       // 自定义开始时间
-      nowDate = new Date(arguments[1].toString());
+      nowDate = new Date(args[1].toString());
     };
 
-    return pushDay(getDateArr(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), arguments[0], []), nowDate.getDay());
+    return pushDay(getDateArr(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), args[0], []), nowDate.getDay());
   };
 })();
 
@@ -323,9 +323,7 @@ const htmlpx2rem = (function() {
 
     if (beforeArr !== null) {
       for (let styleStr of beforeArr) {
-        const temp = styleStr.replace('style="', '').replace(/([\d]+)px/ig, function() {
-          return arguments[1] / 100 + 'rem';
-        }).replace(/(font-family:[^;]*(;)?)/ig, '');
+        const temp = styleStr.replace('style="', '').replace(/([\d]+)px/ig, ...args => args[1] / 100 + 'rem').replace(/(font-family:[^;]*(;)?)/ig, '');
         const tempArry = temp.split(';');
         let tempStr = '';
 
@@ -377,15 +375,15 @@ const disableScroll = (function() {
     if ((evt.type === 'keydown' && evt.keyCode >= 33 && evt.keyCode <= 40) || evt.type === 'touchmove' || evt.type === 'mousewheel') evt.preventDefault();
   };
 
-  return function() {
-    if (arguments.length === 0 || arguments[0] === true) {
+  return (...args) => {
+    if (args.length === 0 || args[0] === true) {
       // 禁用默认事件，防止页面滚动
       document.body.addEventListener('touchmove', preventEvent);
       document.addEventListener('mousewheel', preventEvent);
       document.addEventListener('keydown', preventEvent);
 
       return true;
-    } else if (arguments[0] === false) {
+    } else if (args[0] === false) {
       document.body.removeEventListener('touchmove', preventEvent);
       document.removeEventListener('mousewheel', preventEvent);
       document.removeEventListener('keydown', preventEvent);

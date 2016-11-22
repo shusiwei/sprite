@@ -1,5 +1,4 @@
-var _this = this,
-    _arguments = arguments;
+var _this = this;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -85,19 +84,19 @@ var query2json = function () {
   var queryKey = void 0;
 
   // 如果queryStr不符合query的格式但符合key的格式，那么queryStr就代表key
-  switch (_arguments.length) {
+  switch (arguments.length) {
     case 1:
-      if (isString(_arguments[0]) && includes(_arguments[0], '=')) {
-        queryStr = _arguments[0];
-      } else if (isArray(_arguments[0]) || isString(_arguments[0]) && !includes(_arguments[0], '=')) {
-        queryKey = _arguments[0];
+      if (isString(arguments.length <= 0 ? undefined : arguments[0]) && includes(arguments.length <= 0 ? undefined : arguments[0], '=')) {
+        queryStr = arguments.length <= 0 ? undefined : arguments[0];
+      } else if (isArray(arguments.length <= 0 ? undefined : arguments[0]) || isString(arguments.length <= 0 ? undefined : arguments[0]) && !includes(arguments.length <= 0 ? undefined : arguments[0], '=')) {
+        queryKey = arguments.length <= 0 ? undefined : arguments[0];
       };
 
       break;
 
     case 2:
-      queryStr = _arguments[0];
-      queryKey = _arguments[1];
+      queryStr = arguments.length <= 0 ? undefined : arguments[0];
+      queryKey = arguments.length <= 1 ? undefined : arguments[1];
 
       break;
   };
@@ -189,8 +188,7 @@ var formatStr = function (str) {
 }.bind(this);
 
 var getDate = function () {
-  var _this2 = this,
-      _arguments2 = arguments;
+  var _this2 = this;
 
   // 周
   var weekArr = ['日', '一', '二', '三', '四', '五', '六'];
@@ -233,19 +231,23 @@ var getDate = function () {
   }.bind(this);
 
   return function () {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
     _newArrowCheck(this, _this2);
 
     var nowDate = void 0;
 
-    if (_arguments2.length === 1) {
+    if (args.length === 1) {
       // 获取当前时间
       nowDate = new Date();
-    } else if (_arguments2.length === 2) {
+    } else if (args.length === 2) {
       // 自定义开始时间
-      nowDate = new Date(_arguments2[1].toString());
+      nowDate = new Date(args[1].toString());
     };
 
-    return pushDay(getDateArr(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), _arguments2[0], []), nowDate.getDay());
+    return pushDay(getDateArr(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), args[0], []), nowDate.getDay());
   }.bind(this);
 }();
 
@@ -356,6 +358,8 @@ var htmlpx2rem = function () {
   var classRegex = /class="([^"]+)"/ig;
 
   return function (html) {
+    var _this3 = this;
+
     if (!isString(html)) return html;
 
     var beforeArr = html.match(styleRegex);
@@ -365,6 +369,8 @@ var htmlpx2rem = function () {
 
     if (beforeArr !== null) {
       for (var _iterator = beforeArr, _isArray = Array.isArray(_iterator), _i2 = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+        var _styleStr$replace;
+
         var _ref;
 
         if (_isArray) {
@@ -378,9 +384,11 @@ var htmlpx2rem = function () {
 
         var styleStr = _ref;
 
-        var temp = styleStr.replace('style="', '').replace(/([\d]+)px/ig, function () {
-          return arguments[1] / 100 + 'rem';
-        }).replace(/(font-family:[^;]*(;)?)/ig, '');
+        var temp = (_styleStr$replace = styleStr.replace('style="', '')).replace.apply(_styleStr$replace, [/([\d]+)px/ig].concat(function (args) {
+          _newArrowCheck(this, _this3);
+
+          return args[1] / 100 + 'rem';
+        }.bind(this))).replace(/(font-family:[^;]*(;)?)/ig, '');
         var tempArry = temp.split(';');
         var tempStr = '';
 
@@ -462,30 +470,32 @@ var autoRootEM = function (scale) {
 }.bind(this);
 
 var disableScroll = function () {
-  var _this3 = this;
+  var _this4 = this;
 
   var preventEvent = function (evt) {
-    _newArrowCheck(this, _this3);
+    _newArrowCheck(this, _this4);
 
     if (evt.type === 'keydown' && evt.keyCode >= 33 && evt.keyCode <= 40 || evt.type === 'touchmove' || evt.type === 'mousewheel') evt.preventDefault();
   }.bind(this);
 
   return function () {
-    if (arguments.length === 0 || arguments[0] === true) {
+    _newArrowCheck(this, _this4);
+
+    if (arguments.length === 0 || (arguments.length <= 0 ? undefined : arguments[0]) === true) {
       // 禁用默认事件，防止页面滚动
       document.body.addEventListener('touchmove', preventEvent);
       document.addEventListener('mousewheel', preventEvent);
       document.addEventListener('keydown', preventEvent);
 
       return true;
-    } else if (arguments[0] === false) {
+    } else if ((arguments.length <= 0 ? undefined : arguments[0]) === false) {
       document.body.removeEventListener('touchmove', preventEvent);
       document.removeEventListener('mousewheel', preventEvent);
       document.removeEventListener('keydown', preventEvent);
 
       return false;
     };
-  };
+  }.bind(this);
 }();
 
 var Sticky = function () {
@@ -517,10 +527,10 @@ var Sticky = function () {
   };
 
   Sticky.prototype.bind = function bind() {
-    var _this4 = this;
+    var _this5 = this;
 
     this.event = function () {
-      _newArrowCheck(this, _this4);
+      _newArrowCheck(this, _this5);
 
       return this.updatePosition();
     }.bind(this);
