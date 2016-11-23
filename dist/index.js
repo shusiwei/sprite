@@ -14,24 +14,29 @@ function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { t
  * https://github.com/shusiwei/tyin-node
  * Licensed under the MIT license.
  */
-import { isNumber, isPlainObject, isString, isArray, includes, forEach, indexOf } from 'tiny';
+import { isNumber, isPlainObject, isString, isArray, includes, forEach, indexOf, isPosiInteger } from 'tiny';
 
-var global = window;
 var document = window.document;
-var html = document.documentElement;
+var documentElement = document.documentElement;
 
 var createElement = function (tagName) {
-  return this.createElement(tagName);
-}.bind(document);
-var getComputedStyle = function (target, pseudo) {
-  return this.getComputedStyle(target, pseudo);
-}.bind(global);
+  _newArrowCheck(this, _this);
+
+  return document.createElement(tagName);
+}.bind(this);
+var computedStyle = function () {
+  var _window;
+
+  _newArrowCheck(this, _this);
+
+  return (_window = window).computedStyle.apply(_window, arguments);
+}.bind(this);
 
 /**
  * @name 对字符串进行类型测试
  *
- * @params {String} type 测试的类型
- * @params {String} value 测试的字符串
+ * @params {String} type * 测试的类型
+ * @params {String} value * 测试的字符串
  *
  * @return {Boolean} 测试通过返回真，否则返回假
  */
@@ -72,7 +77,7 @@ var test = function (type, value) {
 /**
  * @name 将一个对象序列化为一个queryString字符串
  *
- * @params {Object} source 操作的对象
+ * @params {Object} source * 操作的对象
  *
  * @return {String} queryString字符串
  */
@@ -82,6 +87,8 @@ var serialize = function () {
   }
 
   _newArrowCheck(this, _this);
+
+  if (sources.length === 0) throw new Error('least one parameter is required');
 
   var result = [];
 
@@ -112,7 +119,7 @@ var serialize = function () {
 /**
  * @name 将一个queryString字符串转化成一个对象
  *
- * @params {String} source 操作的对象
+ * @params {String} source * 操作的对象
  * @params {String} keys 需要返回值的key
  *
  * @return {Object} 当keys参数为空时，返回该对象，当keys参数只有一个时，则返回该对象中key为此参数的值，当keys参数有多个时，则以一个对象的形式返回该对象所有keys中的参数的值
@@ -126,11 +133,7 @@ var queryParse = function (source) {
 
   if (!isString(source)) throw new TypeError('source must b a String');
 
-  var result = Object.defineProperty({}, 'length', {
-    value: 0,
-    writable: true,
-    enumerable: false
-  });
+  var result = Object.defineProperty({}, 'length', { value: 0, writable: true, enumerable: false });
 
   forEach(source.replace(/^\?/, '').split('&'), function (string) {
     _newArrowCheck(this, _this);
@@ -144,11 +147,7 @@ var queryParse = function (source) {
   if (keys.length === 0) return result;
   if (keys.length === 1) return result[keys[0]];
 
-  var dump = Object.defineProperty({}, 'length', {
-    value: 0,
-    writable: true,
-    enumerable: false
-  });
+  var dump = Object.defineProperty({}, 'length', { value: 0, writable: true, enumerable: false });
 
   forEach(keys, function (key) {
     _newArrowCheck(this, _this);
@@ -163,7 +162,6 @@ var queryParse = function (source) {
 /**
  * @name 将cookie字符串转化成一个对象
  *
- * @params {String} source 操作的对象
  * @params {String} keys 需要返回值的key
  *
  * @return {Object} 当keys参数为空时，返回该对象，当keys参数只有一个时，则返回该对象中key为此参数的值，当keys参数有多个时，则以一个对象的形式返回该对象所有keys中的参数的值
@@ -175,71 +173,94 @@ var cookieParse = function () {
 
   _newArrowCheck(this, _this);
 
-  var cookie = document.cookie;
-
-  if (!cookie || !includes(cookie, '=')) return null;
-
-  return queryParse.apply(undefined, [cookie.replace(/; /g, '&')].concat(keys));
+  return queryParse.apply(undefined, [document.cookie.replace(/; /g, '&')].concat(keys));
 }.bind(this);
 
-var setCookie = function (name, value, exp, options) {
+/**
+ * @name 设置cookie
+ *
+ * @params {String} name * cookie名称
+ * @params {String} value * cookie值
+ * @params {Number} expires 过期天数
+ * @params {Object} options 其它参数
+ * @params {String} options.path cookie所在路径
+ * @params {String} options.domain cookie所在域
+ * @params {String} options.secure cookie是否只允许在安全链接中读取
+ */
+var setCookie = function (name, value) {
+  for (var _len4 = arguments.length, options = Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
+    options[_key4 - 2] = arguments[_key4];
+  }
+
   _newArrowCheck(this, _this);
 
-  var cookie = '';
+  var cookie = name + '=' + value;
 
-  if (isNumber(exp)) {
-    var date = new Date();
-    date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
+  for (var _iterator2 = options, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+    var _ref2;
 
-    cookie += name + '=' + value + ';expires=' + date.toGMTString();
-  } else {
-    cookie += name + '=' + value + ';';
-  };
+    if (_isArray2) {
+      if (_i2 >= _iterator2.length) break;
+      _ref2 = _iterator2[_i2++];
+    } else {
+      _i2 = _iterator2.next();
+      if (_i2.done) break;
+      _ref2 = _i2.value;
+    }
 
-  if (isPlainObject(options)) {
-    if (options.path) cookie += ';path=' + options.path;
-    if (options.domain) cookie += ';domain=' + options.domain;
-    if (options.secure) cookie += ';domain=' + options.secure;
+    var option = _ref2;
+
+    if (isPosiInteger(option)) {
+      var date = new Date();
+      date.setTime(date.getTime() + option * 24 * 60 * 60 * 1000);
+
+      cookie += ';expires=' + date.toGMTString();
+    };
+
+    if (isPlainObject(options)) {
+      if (options.path) cookie += ';path=' + options.path;
+      if (options.domain) cookie += ';domain=' + options.domain;
+      if (options.secure) cookie += ';secure=' + options.secure;
+    };
   };
 
   document.cookie = cookie;
 
-  return cookie2json(name);
+  return cookie2json();
 }.bind(this);
 
-var isType = function (regex) {
-  return function (type, obj) {
-    console.warn('is method deprecated, plase use test method');
+var isType = function (type, obj) {
+  _newArrowCheck(this, _this);
 
-    switch (type) {
-      case 'nickname':
-      case 'cell':
-      case 'tel':
-      case 'email':
-      case 'chinese':
-        return isString(obj) && regex[type].test(obj);
+  console.warn('is method deprecated, plase use test method');
 
-      case 'phone':
-        return regex['tel'].test(obj) && regex['cell'].test(obj);
+  switch (type) {
+    case 'nickname':
+      return test('username', obj);
 
-      default:
-        return false;
-    }
-  };
-}({
-  nickname: /^[\u4E00-\u9FA5a-zA-Z]{2,15}$/,
-  cell: /^(13[0-9]{9}|15[012356789][0-9]{8}|18[0-9][0-9]{8}|14[57][0-9]{8}|17[01678][0-9]{8})$/,
-  tel: /^(0\d{2,3})?(\d{7,8})$/,
-  email: /^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/,
-  chinese: /^[\u4E00-\u9FA5]+$/
-});
+    case 'cell':
+      return test('cellphone', obj);
+
+    case 'tel':
+      return test('telephone', obj);
+
+    case 'email':
+      return test('email', obj);
+
+    case 'chinese':
+      return test('chinese', obj);
+
+    case 'phone':
+      return test('phone', obj);
+  }
+}.bind(this);
 
 var query2json = function () {
   _newArrowCheck(this, _this);
 
   console.warn('query2json method deprecated, plase use queryParse method');
 
-  var queryStr = global.location.search.split('?').pop();
+  var queryStr = window.location.search.split('?').pop();
   var queryKey = void 0;
 
   // 如果queryStr不符合query的格式但符合key的格式，那么queryStr就代表key
@@ -338,12 +359,12 @@ var formatStr = function (str) {
   } else if (isNumber(pattern)) {
     if (!isNumber(maxLength) || maxLength < 1) return;
 
-    for (var _i2 = 0; _i2 < str.length; _i2++) {
-      if (_i2 > 0 && _i2 % pattern === 0) text += separator;
+    for (var _i3 = 0; _i3 < str.length; _i3++) {
+      if (_i3 > 0 && _i3 % pattern === 0) text += separator;
 
-      text += str[_i2];
+      text += str[_i3];
 
-      if (_i2 + 1 > maxLength - 1) break;
+      if (_i3 + 1 > maxLength - 1) break;
     };
   };
 
@@ -394,8 +415,8 @@ var getDate = function () {
   }.bind(this);
 
   return function () {
-    for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-      args[_key4] = arguments[_key4];
+    for (var _len5 = arguments.length, args = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+      args[_key5] = arguments[_key5];
     }
 
     _newArrowCheck(this, _this2);
@@ -507,13 +528,13 @@ var isChildNode = function (childNode, parentNode) {
 var px2rem = function (value) {
   _newArrowCheck(this, _this);
 
-  return parseFloat(value) / parseInt(getComputedStyle(html, ':root').fontSize) + 'rem';
+  return parseFloat(value) / parseInt(computedStyle(documentElement, ':root').fontSize) + 'rem';
 }.bind(this);
 
 var rem2px = function (value) {
   _newArrowCheck(this, _this);
 
-  return parseFloat(value) * parseInt(getComputedStyle(html, ':root').fontSize);
+  return parseFloat(value) * parseInt(computedStyle(documentElement, ':root').fontSize);
 }.bind(this);
 
 var htmlpx2rem = function () {
@@ -531,21 +552,21 @@ var htmlpx2rem = function () {
     var newHtml = html.replace(styleRegex, placeholder).replace(classRegex, '');
 
     if (beforeArr !== null) {
-      for (var _iterator2 = beforeArr, _isArray2 = Array.isArray(_iterator2), _i3 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+      for (var _iterator3 = beforeArr, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
         var _styleStr$replace;
 
-        var _ref2;
+        var _ref3;
 
-        if (_isArray2) {
-          if (_i3 >= _iterator2.length) break;
-          _ref2 = _iterator2[_i3++];
+        if (_isArray3) {
+          if (_i4 >= _iterator3.length) break;
+          _ref3 = _iterator3[_i4++];
         } else {
-          _i3 = _iterator2.next();
-          if (_i3.done) break;
-          _ref2 = _i3.value;
+          _i4 = _iterator3.next();
+          if (_i4.done) break;
+          _ref3 = _i4.value;
         }
 
-        var styleStr = _ref2;
+        var styleStr = _ref3;
 
         var temp = (_styleStr$replace = styleStr.replace('style="', '')).replace.apply(_styleStr$replace, [/([\d]+)px/ig].concat(function (args) {
           _newArrowCheck(this, _this3);
@@ -555,19 +576,19 @@ var htmlpx2rem = function () {
         var tempArry = temp.split(';');
         var tempStr = '';
 
-        for (var _iterator3 = tempArry, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-          var _ref3;
+        for (var _iterator4 = tempArry, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+          var _ref4;
 
-          if (_isArray3) {
-            if (_i4 >= _iterator3.length) break;
-            _ref3 = _iterator3[_i4++];
+          if (_isArray4) {
+            if (_i5 >= _iterator4.length) break;
+            _ref4 = _iterator4[_i5++];
           } else {
-            _i4 = _iterator3.next();
-            if (_i4.done) break;
-            _ref3 = _i4.value;
+            _i5 = _iterator4.next();
+            if (_i5.done) break;
+            _ref4 = _i5.value;
           }
 
-          var styleRule = _ref3;
+          var styleRule = _ref4;
 
           if (styleRule && includes(styleRule, ':')) tempStr += styleRule.trim().toLowerCase().replace(': ', ':') + ';';
         };
@@ -576,19 +597,19 @@ var htmlpx2rem = function () {
       };
     };
 
-    for (var _iterator4 = afterArr, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
-      var _ref4;
+    for (var _iterator5 = afterArr, _isArray5 = Array.isArray(_iterator5), _i6 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
+      var _ref5;
 
-      if (_isArray4) {
-        if (_i5 >= _iterator4.length) break;
-        _ref4 = _iterator4[_i5++];
+      if (_isArray5) {
+        if (_i6 >= _iterator5.length) break;
+        _ref5 = _iterator5[_i6++];
       } else {
-        _i5 = _iterator4.next();
-        if (_i5.done) break;
-        _ref4 = _i5.value;
+        _i6 = _iterator5.next();
+        if (_i6.done) break;
+        _ref5 = _i6.value;
       }
 
-      var _styleStr = _ref4;
+      var _styleStr = _ref5;
 
       newHtml = newHtml.replace(placeholder, _styleStr);
     };
@@ -605,7 +626,7 @@ var autoRootEM = function (scale) {
   var getRootSize = function () {
     _newArrowCheck(this, _this);
 
-    return Math.floor(global.innerWidth / scale * 625) + '%';
+    return Math.floor(window.innerWidth / scale * 625) + '%';
   }.bind(this);
   var remStyle = function (rootem) {
     document.head.appendChild(rootem);
@@ -622,9 +643,9 @@ var autoRootEM = function (scale) {
     return remStyle.fontSize = getRootSize();
   }.bind(this);
 
-  global.addEventListener('resize', update);
-  global.addEventListener('load', update);
-  global.addEventListener('orientationchange', update);
+  window.addEventListener('resize', update);
+  window.addEventListener('load', update);
+  window.addEventListener('orientationchange', update);
 
   document.addEventListener('DOMContentLoaded', update);
   document.addEventListener('readystatechange', update);
@@ -668,7 +689,7 @@ var Sticky = function () {
     this.target = target;
     this.body = body;
 
-    this.position = getComputedStyle(this.target).position;
+    this.position = computedStyle(this.target).position;
 
     this.bind();
     this.updatePosition();

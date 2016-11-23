@@ -8,24 +8,19 @@
  * https://github.com/shusiwei/tyin-node
  * Licensed under the MIT license.
  */
-import {isNumber, isPlainObject, isString, isArray, includes, forEach, indexOf} from 'tiny';
+import {isNumber, isPlainObject, isString, isArray, includes, forEach, indexOf, isPosiInteger} from 'tiny';
 
-const global = window;
 const document = window.document;
-const html = document.documentElement;
+const documentElement = document.documentElement;
 
-const createElement = function(tagName) {
-  return this.createElement(tagName);
-}.bind(document);
-const getComputedStyle = function(target, pseudo) {
-  return this.getComputedStyle(target, pseudo);
-}.bind(global);
+const createElement = (tagName) => document.createElement(tagName);
+const computedStyle = (...args) => window.computedStyle(...args);
 
 /**
  * @name 对字符串进行类型测试
  *
- * @params {String} type 测试的类型
- * @params {String} value 测试的字符串
+ * @params {String} type * 测试的类型
+ * @params {String} value * 测试的字符串
  *
  * @return {Boolean} 测试通过返回真，否则返回假
  */
@@ -59,11 +54,13 @@ const test = (type, value) => {
 /**
  * @name 将一个对象序列化为一个queryString字符串
  *
- * @params {Object} source 操作的对象
+ * @params {Object} source * 操作的对象
  *
  * @return {String} queryString字符串
  */
 const serialize = (...sources) => {
+  if (sources.length === 0) throw new Error('least one parameter is required');
+
   const result = [];
 
   for (let source of sources) {
@@ -80,7 +77,7 @@ const serialize = (...sources) => {
 /**
  * @name 将一个queryString字符串转化成一个对象
  *
- * @params {String} source 操作的对象
+ * @params {String} source * 操作的对象
  * @params {String} keys 需要返回值的key
  *
  * @return {Object} 当keys参数为空时，返回该对象，当keys参数只有一个时，则返回该对象中key为此参数的值，当keys参数有多个时，则以一个对象的形式返回该对象所有keys中的参数的值
@@ -88,11 +85,7 @@ const serialize = (...sources) => {
 const queryParse = (source, ...keys) => {
   if (!isString(source)) throw new TypeError('source must b a String');
 
-  const result = Object.defineProperty({}, 'length', {
-    value: 0,
-    writable: true,
-    enumerable: false
-  });
+  const result = Object.defineProperty({}, 'length', {value: 0, writable: true, enumerable: false});
 
   forEach(source.replace(/^\?/, '').split('&'), string => {
     const item = string.split('=');
@@ -104,11 +97,7 @@ const queryParse = (source, ...keys) => {
   if (keys.length === 0) return result;
   if (keys.length === 1) return result[keys[0]];
 
-  const dump = Object.defineProperty({}, 'length', {
-    value: 0,
-    writable: true,
-    enumerable: false
-  });
+  const dump = Object.defineProperty({}, 'length', {value: 0, writable: true, enumerable: false});
 
   forEach(keys, key => {
     dump[key] = result[key];
@@ -121,73 +110,74 @@ const queryParse = (source, ...keys) => {
 /**
  * @name 将cookie字符串转化成一个对象
  *
- * @params {String} source 操作的对象
  * @params {String} keys 需要返回值的key
  *
  * @return {Object} 当keys参数为空时，返回该对象，当keys参数只有一个时，则返回该对象中key为此参数的值，当keys参数有多个时，则以一个对象的形式返回该对象所有keys中的参数的值
  */
-const cookieParse = (...keys) => {
-  const cookie = document.cookie;
+const cookieParse = (...keys) => queryParse(document.cookie.replace(/; /g, '&'), ...keys);
 
-  if (!cookie || !includes(cookie, '=')) return null;
+/**
+ * @name 设置cookie
+ *
+ * @params {String} name * cookie名称
+ * @params {String} value * cookie值
+ * @params {Number} expires 过期天数
+ * @params {Object} options 其它参数
+ * @params {String} options.path cookie所在路径
+ * @params {String} options.domain cookie所在域
+ * @params {String} options.secure cookie是否只允许在安全链接中读取
+ */
+const setCookie = (name, value, ...options) => {
+  let cookie = name + '=' + value;
 
-  return queryParse(cookie.replace(/; /g, '&'), ...keys);
-};
+  for (let option of options) {
+    if (isPosiInteger(option)) {
+      const date = new Date();
+      date.setTime(date.getTime() + option * 24 * 60 * 60 * 1000);
 
-const setCookie = (name, value, exp, options) => {
-  let cookie = '';
+      cookie += ';expires=' + date.toGMTString();
+    };
 
-  if (isNumber(exp)) {
-    let date = new Date();
-    date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
-
-    cookie += name + '=' + value + ';expires=' + date.toGMTString();
-  } else {
-    cookie += name + '=' + value + ';';
-  };
-
-  if (isPlainObject(options)) {
-    if (options.path) cookie += ';path=' + options.path;
-    if (options.domain) cookie += ';domain=' + options.domain;
-    if (options.secure) cookie += ';domain=' + options.secure;
+    if (isPlainObject(options)) {
+      if (options.path) cookie += ';path=' + options.path;
+      if (options.domain) cookie += ';domain=' + options.domain;
+      if (options.secure) cookie += ';secure=' + options.secure;
+    };
   };
 
   document.cookie = cookie;
 
-  return cookie2json(name);
+  return cookie2json();
 };
 
-const isType = (function(regex) {
-  return function(type, obj) {
-    console.warn('is method deprecated, plase use test method');
+const isType = (type, obj) => {
+  console.warn('is method deprecated, plase use test method');
 
-    switch (type) {
-      case 'nickname' :
-      case 'cell' :
-      case 'tel' :
-      case 'email' :
-      case 'chinese' :
-        return isString(obj) && regex[type].test(obj);
+  switch (type) {
+    case 'nickname' :
+      return test('username', obj);
 
-      case 'phone' :
-        return regex['tel'].test(obj) && regex['cell'].test(obj);
+    case 'cell' :
+      return test('cellphone', obj);
 
-      default :
-        return false;
-    }
-  };
-})({
-  nickname: /^[\u4E00-\u9FA5a-zA-Z]{2,15}$/,
-  cell: /^(13[0-9]{9}|15[012356789][0-9]{8}|18[0-9][0-9]{8}|14[57][0-9]{8}|17[01678][0-9]{8})$/,
-  tel: /^(0\d{2,3})?(\d{7,8})$/,
-  email: /^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/,
-  chinese: /^[\u4E00-\u9FA5]+$/
-});
+    case 'tel' :
+      return test('telephone', obj);
+
+    case 'email' :
+      return test('email', obj);
+
+    case 'chinese' :
+      return test('chinese', obj);
+
+    case 'phone' :
+      return test('phone', obj);
+  }
+};
 
 const query2json = (...args) => {
   console.warn('query2json method deprecated, plase use queryParse method');
 
-  let queryStr = global.location.search.split('?').pop();
+  let queryStr = window.location.search.split('?').pop();
   let queryKey;
 
   // 如果queryStr不符合query的格式但符合key的格式，那么queryStr就代表key
@@ -426,9 +416,9 @@ const isChildNode = (childNode, parentNode) => {
   return false;
 };
 
-const px2rem = (value) => parseFloat(value) / parseInt(getComputedStyle(html, ':root').fontSize) + 'rem';
+const px2rem = (value) => parseFloat(value) / parseInt(computedStyle(documentElement, ':root').fontSize) + 'rem';
 
-const rem2px = (value) => parseFloat(value) * parseInt(getComputedStyle(html, ':root').fontSize);
+const rem2px = (value) => parseFloat(value) * parseInt(computedStyle(documentElement, ':root').fontSize);
 
 const htmlpx2rem = (function() {
   const styleRegex = /style="([^"]+)"/ig;
@@ -467,7 +457,7 @@ const htmlpx2rem = (function() {
 const autoRootEM = (scale) => {
   if (!scale) return;
 
-  const getRootSize = () => Math.floor(global.innerWidth / scale * 625) + '%';
+  const getRootSize = () => Math.floor(window.innerWidth / scale * 625) + '%';
   const remStyle = (function(rootem) {
     document.head.appendChild(rootem);
     rootem.type = 'text/css';
@@ -481,9 +471,9 @@ const autoRootEM = (scale) => {
     return (remStyle.fontSize = getRootSize());
   };
 
-  global.addEventListener('resize', update);
-  global.addEventListener('load', update);
-  global.addEventListener('orientationchange', update);
+  window.addEventListener('resize', update);
+  window.addEventListener('load', update);
+  window.addEventListener('orientationchange', update);
 
   document.addEventListener('DOMContentLoaded', update);
   document.addEventListener('readystatechange', update);
@@ -519,7 +509,7 @@ class Sticky {
     this.target = target;
     this.body = body;
 
-    this.position = getComputedStyle(this.target).position;
+    this.position = computedStyle(this.target).position;
 
     this.bind();
     this.updatePosition();
