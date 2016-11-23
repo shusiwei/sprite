@@ -21,30 +21,40 @@ const getComputedStyle = function(target, pseudo) {
   return this.getComputedStyle(target, pseudo);
 }.bind(global);
 
-const isType = (function(regex) {
-  return function(type, obj) {
-    switch (type) {
-      case 'nickname' :
-      case 'cell' :
-      case 'tel' :
-      case 'email' :
-      case 'chinese' :
-        return isString(obj) && regex[type].test(obj);
+/**
+ * @name 对字符串进行类型测试
+ *
+ * @params {String} type 测试的类型
+ * @params {String} value 测试的字符串
+ *
+ * @return {Boolean} 测试通过返回真，否则返回假
+ */
+const test = (type, value) => {
+  if (!isString(value)) throw new TypeError('value must be a String');
 
-      case 'phone' :
-        return regex['tel'].test(obj) && regex['cell'].test(obj);
+  switch (type) {
+    case 'username' :
+      return /^[\u4E00-\u9FA5a-zA-Z]{2,15}$/.test(value);
 
-      default :
-        return false;
-    }
+    case 'cellphone' :
+      return /^(13[0-9]{9}|15[012356789][0-9]{8}|18[0-9][0-9]{8}|14[57][0-9]{8}|17[01678][0-9]{8})$/.test(value);
+
+    case 'telephone' :
+      return /^(0\d{2,3})?(\d{7,8})$/.test(value);
+
+    case 'phone' :
+      return test('cell', value) && test('tel', value);
+
+    case 'email' :
+      return /^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/.test(value);
+
+    case 'chinese' :
+      return /^[\u4E00-\u9FA5]+$/.test(value);
+
+    default :
+      throw new Error('test type support username/cellphone/telephone/phone/email/chinese');
   };
-})({
-  nickname: /^[\u4E00-\u9FA5a-zA-Z]{2,15}$/,
-  cell: /^(13[0-9]{9}|15[012356789][0-9]{8}|18[0-9][0-9]{8}|14[57][0-9]{8}|17[01678][0-9]{8})$/,
-  tel: /^(0\d{2,3})?(\d{7,8})$/,
-  email: /^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/,
-  chinese: /^[\u4E00-\u9FA5]+$/
-});
+};
 
 /**
  * @name 将一个对象序列化为一个queryString字符串
@@ -144,6 +154,33 @@ const setCookie = (name, value, exp, options) => {
 
   return cookie2json(name);
 };
+
+const isType = (function(regex) {
+  return function(type, obj) {
+    console.warn('is method deprecated, plase use test method');
+
+    switch (type) {
+      case 'nickname' :
+      case 'cell' :
+      case 'tel' :
+      case 'email' :
+      case 'chinese' :
+        return isString(obj) && regex[type].test(obj);
+
+      case 'phone' :
+        return regex['tel'].test(obj) && regex['cell'].test(obj);
+
+      default :
+        return false;
+    }
+  };
+})({
+  nickname: /^[\u4E00-\u9FA5a-zA-Z]{2,15}$/,
+  cell: /^(13[0-9]{9}|15[012356789][0-9]{8}|18[0-9][0-9]{8}|14[57][0-9]{8}|17[01678][0-9]{8})$/,
+  tel: /^(0\d{2,3})?(\d{7,8})$/,
+  email: /^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/,
+  chinese: /^[\u4E00-\u9FA5]+$/
+});
 
 const query2json = (...args) => {
   console.warn('query2json method deprecated, plase use queryParse method');
@@ -249,6 +286,10 @@ const formatStr = (str, pattern = 4, maxLength, separator = ' ') => {
   };
 
   return text;
+};
+
+const future = (...args) => {
+
 };
 
 const getDate = (function() {
