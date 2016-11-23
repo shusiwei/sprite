@@ -53,7 +53,7 @@ const test = (type, value) => {
 
     default :
       throw new Error('test type support username/cellphone/telephone/phone/email/chinese');
-  };
+  }
 };
 
 /**
@@ -286,10 +286,6 @@ const formatStr = (str, pattern = 4, maxLength, separator = ' ') => {
   };
 
   return text;
-};
-
-const future = (...args) => {
-
 };
 
 const getDate = (function() {
