@@ -63,13 +63,15 @@ const test = (type, value) => {
  *
  * @return {String} queryString字符串
  */
-const serialize = (source) => {
-  if (!isPlainObject(source)) throw new TypeError('source must b a plain Object');
-
+const serialize = (...sources) => {
   const result = [];
 
-  for (let key in source) {
-    if (source[key] !== undefined) result.push(key + '=' + source[key]);
+  for (let source of sources) {
+    if (!isPlainObject(source)) throw new TypeError('source must b a plain Object');
+
+    for (let key in source) {
+      if (source[key] !== undefined) result.push(key + '=' + source[key]);
+    };
   };
 
   return result.join('&');

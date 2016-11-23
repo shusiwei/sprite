@@ -76,15 +76,34 @@ var test = function (type, value) {
  *
  * @return {String} queryString字符串
  */
-var serialize = function (source) {
-  _newArrowCheck(this, _this);
+var serialize = function () {
+  for (var _len = arguments.length, sources = Array(_len), _key = 0; _key < _len; _key++) {
+    sources[_key] = arguments[_key];
+  }
 
-  if (!isPlainObject(source)) throw new TypeError('source must b a plain Object');
+  _newArrowCheck(this, _this);
 
   var result = [];
 
-  for (var key in source) {
-    if (source[key] !== undefined) result.push(key + '=' + source[key]);
+  for (var _iterator = sources, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+    var _ref;
+
+    if (_isArray) {
+      if (_i >= _iterator.length) break;
+      _ref = _iterator[_i++];
+    } else {
+      _i = _iterator.next();
+      if (_i.done) break;
+      _ref = _i.value;
+    }
+
+    var source = _ref;
+
+    if (!isPlainObject(source)) throw new TypeError('source must b a plain Object');
+
+    for (var key in source) {
+      if (source[key] !== undefined) result.push(key + '=' + source[key]);
+    };
   };
 
   return result.join('&');
@@ -99,8 +118,8 @@ var serialize = function (source) {
  * @return {Object} 当keys参数为空时，返回该对象，当keys参数只有一个时，则返回该对象中key为此参数的值，当keys参数有多个时，则以一个对象的形式返回该对象所有keys中的参数的值
  */
 var queryParse = function (source) {
-  for (var _len = arguments.length, keys = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    keys[_key - 1] = arguments[_key];
+  for (var _len2 = arguments.length, keys = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+    keys[_key2 - 1] = arguments[_key2];
   }
 
   _newArrowCheck(this, _this);
@@ -150,8 +169,8 @@ var queryParse = function (source) {
  * @return {Object} 当keys参数为空时，返回该对象，当keys参数只有一个时，则返回该对象中key为此参数的值，当keys参数有多个时，则以一个对象的形式返回该对象所有keys中的参数的值
  */
 var cookieParse = function () {
-  for (var _len2 = arguments.length, keys = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    keys[_key2] = arguments[_key2];
+  for (var _len3 = arguments.length, keys = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+    keys[_key3] = arguments[_key3];
   }
 
   _newArrowCheck(this, _this);
@@ -319,12 +338,12 @@ var formatStr = function (str) {
   } else if (isNumber(pattern)) {
     if (!isNumber(maxLength) || maxLength < 1) return;
 
-    for (var _i = 0; _i < str.length; _i++) {
-      if (_i > 0 && _i % pattern === 0) text += separator;
+    for (var _i2 = 0; _i2 < str.length; _i2++) {
+      if (_i2 > 0 && _i2 % pattern === 0) text += separator;
 
-      text += str[_i];
+      text += str[_i2];
 
-      if (_i + 1 > maxLength - 1) break;
+      if (_i2 + 1 > maxLength - 1) break;
     };
   };
 
@@ -375,8 +394,8 @@ var getDate = function () {
   }.bind(this);
 
   return function () {
-    for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-      args[_key3] = arguments[_key3];
+    for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+      args[_key4] = arguments[_key4];
     }
 
     _newArrowCheck(this, _this2);
@@ -512,21 +531,21 @@ var htmlpx2rem = function () {
     var newHtml = html.replace(styleRegex, placeholder).replace(classRegex, '');
 
     if (beforeArr !== null) {
-      for (var _iterator = beforeArr, _isArray = Array.isArray(_iterator), _i2 = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+      for (var _iterator2 = beforeArr, _isArray2 = Array.isArray(_iterator2), _i3 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
         var _styleStr$replace;
 
-        var _ref;
+        var _ref2;
 
-        if (_isArray) {
-          if (_i2 >= _iterator.length) break;
-          _ref = _iterator[_i2++];
+        if (_isArray2) {
+          if (_i3 >= _iterator2.length) break;
+          _ref2 = _iterator2[_i3++];
         } else {
-          _i2 = _iterator.next();
-          if (_i2.done) break;
-          _ref = _i2.value;
+          _i3 = _iterator2.next();
+          if (_i3.done) break;
+          _ref2 = _i3.value;
         }
 
-        var styleStr = _ref;
+        var styleStr = _ref2;
 
         var temp = (_styleStr$replace = styleStr.replace('style="', '')).replace.apply(_styleStr$replace, [/([\d]+)px/ig].concat(function (args) {
           _newArrowCheck(this, _this3);
@@ -536,19 +555,19 @@ var htmlpx2rem = function () {
         var tempArry = temp.split(';');
         var tempStr = '';
 
-        for (var _iterator2 = tempArry, _isArray2 = Array.isArray(_iterator2), _i3 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-          var _ref2;
+        for (var _iterator3 = tempArry, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+          var _ref3;
 
-          if (_isArray2) {
-            if (_i3 >= _iterator2.length) break;
-            _ref2 = _iterator2[_i3++];
+          if (_isArray3) {
+            if (_i4 >= _iterator3.length) break;
+            _ref3 = _iterator3[_i4++];
           } else {
-            _i3 = _iterator2.next();
-            if (_i3.done) break;
-            _ref2 = _i3.value;
+            _i4 = _iterator3.next();
+            if (_i4.done) break;
+            _ref3 = _i4.value;
           }
 
-          var styleRule = _ref2;
+          var styleRule = _ref3;
 
           if (styleRule && includes(styleRule, ':')) tempStr += styleRule.trim().toLowerCase().replace(': ', ':') + ';';
         };
@@ -557,19 +576,19 @@ var htmlpx2rem = function () {
       };
     };
 
-    for (var _iterator3 = afterArr, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-      var _ref3;
+    for (var _iterator4 = afterArr, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+      var _ref4;
 
-      if (_isArray3) {
-        if (_i4 >= _iterator3.length) break;
-        _ref3 = _iterator3[_i4++];
+      if (_isArray4) {
+        if (_i5 >= _iterator4.length) break;
+        _ref4 = _iterator4[_i5++];
       } else {
-        _i4 = _iterator3.next();
-        if (_i4.done) break;
-        _ref3 = _i4.value;
+        _i5 = _iterator4.next();
+        if (_i5.done) break;
+        _ref4 = _i5.value;
       }
 
-      var _styleStr = _ref3;
+      var _styleStr = _ref4;
 
       newHtml = newHtml.replace(placeholder, _styleStr);
     };
