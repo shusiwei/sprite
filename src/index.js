@@ -76,21 +76,31 @@ const serialize = (source) => {
 const queryParse = (source, ...keys) => {
   if (!isString(source)) throw new TypeError('source must b a String');
 
-  const result = {};
+  const result = Object.defineProperty({}, 'length', {
+    value: 0,
+    writable: true,
+    enumerable: false
+  });
 
-  forEach(source.split('&'), string => {
+  forEach(source.replace(/^\?/, '').split('&'), string => {
     const item = string.split('=');
 
     result[item[0]] = item[1];
+    result.length++;
   });
 
   if (keys.length === 0) return result;
   if (keys.length === 1) return result[keys[0]];
 
-  const dump = {};
+  const dump = Object.defineProperty({}, 'length', {
+    value: 0,
+    writable: true,
+    enumerable: false
+  });
 
   forEach(keys, key => {
     dump[key] = result[key];
+    dump.length++;
   });
 
   return dump;

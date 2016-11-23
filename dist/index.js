@@ -90,25 +90,35 @@ var queryParse = function (source) {
 
   if (!isString(source)) throw new TypeError('source must b a String');
 
-  var result = {};
+  var result = Object.defineProperty({}, 'length', {
+    value: 0,
+    writable: true,
+    enumerable: false
+  });
 
-  forEach(source.split('&'), function (string) {
+  forEach(source.replace(/^\?/, '').split('&'), function (string) {
     _newArrowCheck(this, _this);
 
     var item = string.split('=');
 
     result[item[0]] = item[1];
+    result.length++;
   }.bind(this));
 
   if (keys.length === 0) return result;
   if (keys.length === 1) return result[keys[0]];
 
-  var dump = {};
+  var dump = Object.defineProperty({}, 'length', {
+    value: 0,
+    writable: true,
+    enumerable: false
+  });
 
   forEach(keys, function (key) {
     _newArrowCheck(this, _this);
 
     dump[key] = result[key];
+    dump.length++;
   }.bind(this));
 
   return dump;
