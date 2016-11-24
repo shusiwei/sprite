@@ -29,7 +29,7 @@ var computedStyle = function () {
 
   _newArrowCheck(this, _this);
 
-  return (_window = window).computedStyle.apply(_window, arguments);
+  return (_window = window).getComputedStyle.apply(_window, arguments);
 }.bind(this);
 
 /**

@@ -14,7 +14,7 @@ const document = window.document;
 const documentElement = document.documentElement;
 
 const createElement = (tagName) => document.createElement(tagName);
-const computedStyle = (...args) => window.computedStyle(...args);
+const computedStyle = (...args) => window.getComputedStyle(...args);
 
 /**
  * @name 对字符串进行类型测试
