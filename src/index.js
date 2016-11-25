@@ -8,7 +8,7 @@
  * https://github.com/shusiwei/tyin-node
  * Licensed under the MIT license.
  */
-import {isNumber, isPlainObject, isString, isArray, includes, forEach, indexOf, isPosiInteger} from 'tiny';
+import {isPlainObject, isString, includes, forEach, indexOf, isPosiInteger} from 'tiny';
 
 const document = window.document;
 const documentElement = document.documentElement;
@@ -46,8 +46,11 @@ const test = (type, value) => {
     case 'chinese' :
       return /^[\u4E00-\u9FA5]+$/.test(value);
 
+    case 'integer' :
+      return /^\d+$/g.test(value);
+
     default :
-      throw new Error('test type support username/cellphone/telephone/phone/email/chinese');
+      throw new Error('test type support username/cellphone/telephone/phone/email/chinese/integer');
   }
 };
 
@@ -150,272 +153,6 @@ const setCookie = (name, value, ...options) => {
   return cookieParse();
 };
 
-const isType = (type, obj) => {
-  console.warn('is method deprecated, plase use test method');
-
-  switch (type) {
-    case 'nickname' :
-      return test('username', obj);
-
-    case 'cell' :
-      return test('cellphone', obj);
-
-    case 'tel' :
-      return test('telephone', obj);
-
-    case 'email' :
-      return test('email', obj);
-
-    case 'chinese' :
-      return test('chinese', obj);
-
-    case 'phone' :
-      return test('phone', obj);
-  }
-};
-
-const query2json = (...args) => {
-  console.warn('query2json method deprecated, plase use queryParse method');
-
-  let queryStr = window.location.search.split('?').pop();
-  let queryKey;
-
-  // 如果queryStr不符合query的格式但符合key的格式，那么queryStr就代表key
-  switch (args.length) {
-    case 1 :
-      if (isString(args[0]) && includes(args[0], '=')) {
-        queryStr = args[0];
-      } else if (isArray(args[0]) || (isString(args[0]) && !includes(args[0], '='))) {
-        queryKey = args[0];
-      };
-
-      break;
-
-    case 2 :
-      queryStr = args[0];
-      queryKey = args[1];
-
-      break;
-  };
-
-  if (!queryStr || !includes(queryStr, '=')) return null;
-
-  let data = Object.defineProperty({}, 'length', {
-    value: 0,
-    writable: true,
-    enumerable: false
-  });
-
-  forEach(queryStr.split('&'), function(param, index) {
-    let paramArr = param.split('=');
-    if (paramArr.length === 2) {
-      data[paramArr[0]] = paramArr[1];
-      data.length ++;
-    };
-  });
-
-  if (isString(queryKey)) {
-    return data[queryKey];
-  } else if (isArray(queryKey)) {
-    return (function(keyArr, result) {
-      forEach(keyArr, function(name, index) {
-        result[name] = data[name];
-        result.length ++;
-      });
-
-      return result;
-    })(queryKey, Object.defineProperty({}, 'length', {
-      value: 0,
-      writable: true,
-      enumerable: false
-    }));
-  } else if (queryKey === undefined) {
-    return data;
-  };
-};
-
-const cookie2json = (key) => {
-  console.warn('cookie2json method deprecated, plase use cookieParse method');
-
-  let cookie = document.cookie;
-
-  if (!cookie || !includes(cookie, '=')) return null;
-
-  return queryParse(cookie.replace(/; /g, '&'), key);
-};
-
-const formatStr = (str, pattern = 4, maxLength, separator = ' ') => {
-  console.warn('formatStr method deprecated, plase use separate method from tiny.js');
-
-  if (!isString(str)) return '';
-
-  let text = '';
-
-  if (isString(pattern)) {
-    const patternArr = pattern.split('');
-    const patternLen = pattern.length - pattern.match(/;/g).length;
-
-    for (let i = 0, loop = 0; i < str.length; i++) {
-      if (patternArr[i + loop] === ';') {
-        loop++;
-        text += separator;
-      };
-
-      text += str[i];
-
-      if (i === patternLen - 1) break;
-    };
-  } else if (isNumber(pattern)) {
-    if (!isNumber(maxLength) || maxLength < 1) return;
-
-    for (let i = 0; i < str.length; i++) {
-      if (i > 0 && i % pattern === 0) text += separator;
-
-      text += str[i];
-
-      if (i + 1 > maxLength - 1) break;
-    };
-  };
-
-  return text;
-};
-
-const getDate = (function() {
-  // 周
-  const weekArr = ['日', '一', '二', '三', '四', '五', '六'];
-
-  const dateFixed = (number, fix) => ('0' + (number + fix)).slice(-2);
-
-  const getDateArr = (year, month, date, days, array) => {
-    // 每个月多少天
-    const nowDays = [31, year % 4 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    // 明年
-    const nextYear = year + 1;
-    // 下个月
-    const nextMonth = month === 11 ? 0 : month + 1;
-
-    for (let i = date; i <= nowDays[month]; i++) {
-      array.push([year, dateFixed(month, 1), dateFixed(i, 0)]);
-      if (--days === 0) break;
-    };
-
-    if (days > 0) getDateArr(nextMonth === 0 ? nextYear : year, nextMonth, 1, days, array);
-
-    return array;
-  };
-
-  const pushDay = (dateArr, weekStart) => {
-    for (let i = 0, length = dateArr.length; i < length; i++) {
-      let index = (weekStart + i) % 7;
-      dateArr[i].push(weekArr[index], index);
-    };
-
-    return dateArr;
-  };
-
-  return (...args) => {
-    let nowDate;
-
-    if (args.length === 1) {
-      // 获取当前时间
-      nowDate = new Date();
-    } else if (args.length === 2) {
-      // 自定义开始时间
-      nowDate = new Date(args[1].toString());
-    };
-
-    return pushDay(getDateArr(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), args[0], []), nowDate.getDay());
-  };
-})();
-
-const UA = (function() {
-  const ua = navigator.userAgent.toLowerCase();
-  const android = ua.match(/(android);?[\s/]+([\d.]+)?/i);
-  const ipad = ua.match(/(ipad).*os\s([\d_]+)/i);
-  const ipod = ua.match(/(ipod)(.*os\s([\d_]+))?/i);
-  const iphone = !ipad && ua.match(/(iphone\sos)\s([\d_]+)/i);
-
-  return {
-    isiOS: function(ver) {
-      if (ipad || ipod || iphone) {
-        if (!ver) {
-          return true;
-        } else {
-          if (ua.match(/(os)\s([\d_]+)/)[2].replace(/_/g, '.').search(ver) === 0) {
-            return true;
-          } else {
-            return false;
-          }
-        }
-      } else {
-        return false;
-      }
-    },
-    isAndroid: function(ver) {
-      if (android) {
-        if (!ver) {
-          return true;
-        } else {
-          if (android[2].search(ver) === 0) {
-            return true;
-          } else {
-            return false;
-          }
-        }
-      } else {
-        return false;
-      }
-    },
-    isMobile: function() {
-      return this.isiOS() || this.isAndroid();
-    },
-    isBrowser: (function() {
-      let index = {
-        wechat: indexOf(ua, 'micromessenger'),
-        qq: indexOf(ua, 'qq'),
-        mqq: indexOf(ua, 'mqqbrowser'),
-        uc: indexOf(ua, 'ucbrowser'),
-        safari: indexOf(ua, 'safari'),
-        chrome: indexOf(ua, 'chrome'),
-        firefox: indexOf(ua, 'firefox')
-      };
-
-      return function(name) {
-        if (!(name in index)) return false;
-
-        if (name === 'safari') {
-          return index.safari >= 0 && index.chrome === -1;
-        } else if (name === 'qq') {
-          return index.qq >= 0 && index.mqq === -1;
-        } else {
-          return index[name] >= 0;
-        }
-      };
-    })(),
-    isKernel: function(name) {
-      return !!ua.match(name);
-    },
-    isWebkit: function() {
-      return this.isKernel('applewebkit');
-    }
-  };
-})();
-
-const isChildNode = (childNode, parentNode) => {
-  if (childNode === parentNode) return true;
-  let target = childNode;
-
-  while (target && target.nodeType !== 11) {
-    if (target === parentNode) {
-      return true;
-    } else {
-      target = target.parentNode;
-    };
-  };
-
-  return false;
-};
-
 const px2rem = (value) => parseFloat(value) / parseInt(computedStyle(documentElement, ':root').fontSize) + 'rem';
 
 const rem2px = (value) => parseFloat(value) * parseInt(computedStyle(documentElement, ':root').fontSize);
@@ -453,6 +190,77 @@ const htmlpx2rem = (function() {
     return newHtml;
   };
 }());
+
+const ua = navigator.userAgent.toLowerCase();
+const android = ua.match(/(android);?[\s/]+([\d.]+)?/i);
+const ipad = ua.match(/(ipad).*os\s([\d_]+)/i);
+const ipod = ua.match(/(ipod)(.*os\s([\d_]+))?/i);
+const iphone = !ipad && ua.match(/(iphone\sos)\s([\d_]+)/i);
+
+const userAgent = {
+  isiOS: function(ver) {
+    if (ipad || ipod || iphone) {
+      if (!ver) {
+        return true;
+      } else {
+        if (ua.match(/(os)\s([\d_]+)/)[2].replace(/_/g, '.').search(ver) === 0) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    } else {
+      return false;
+    }
+  },
+  isAndroid: function(ver) {
+    if (android) {
+      if (!ver) {
+        return true;
+      } else {
+        if (android[2].search(ver) === 0) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    } else {
+      return false;
+    }
+  },
+  isMobile: function() {
+    return this.isiOS() || this.isAndroid();
+  },
+  isBrowser: (function() {
+    let index = {
+      wechat: indexOf(ua, 'micromessenger'),
+      qq: indexOf(ua, 'qq'),
+      mqq: indexOf(ua, 'mqqbrowser'),
+      uc: indexOf(ua, 'ucbrowser'),
+      safari: indexOf(ua, 'safari'),
+      chrome: indexOf(ua, 'chrome'),
+      firefox: indexOf(ua, 'firefox')
+    };
+
+    return function(name) {
+      if (!(name in index)) return false;
+
+      if (name === 'safari') {
+        return index.safari >= 0 && index.chrome === -1;
+      } else if (name === 'qq') {
+        return index.qq >= 0 && index.mqq === -1;
+      } else {
+        return index[name] >= 0;
+      }
+    };
+  })(),
+  isKernel: function(name) {
+    return !!ua.match(name);
+  },
+  isWebkit: function() {
+    return this.isKernel('applewebkit');
+  }
+};
 
 const autoRootEM = (scale) => {
   if (!scale) return;
@@ -537,24 +345,71 @@ class Sticky {
     window.removeEventListener('resize', this.event);
     window.removeEventListener('scroll', this.event);
   }
-}
-
-const $ = {
-  is: isType,
-  setCookie,
-  query2json,
-  cookie2json,
-  formatStr,
-  getDate,
-  UA,
-  isChildNode,
-  px2rem,
-  rem2px,
-  htmlpx2rem,
-  autoRootEM,
-  disableScroll,
-  Sticky
 };
 
+const getDate = (function() {
+  // 周
+  const weekArr = ['日', '一', '二', '三', '四', '五', '六'];
+
+  const dateFixed = (number, fix) => ('0' + (number + fix)).slice(-2);
+
+  const getDateArr = (year, month, date, days, array) => {
+    // 每个月多少天
+    const nowDays = [31, year % 4 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    // 明年
+    const nextYear = year + 1;
+    // 下个月
+    const nextMonth = month === 11 ? 0 : month + 1;
+
+    for (let i = date; i <= nowDays[month]; i++) {
+      array.push([year, dateFixed(month, 1), dateFixed(i, 0)]);
+      if (--days === 0) break;
+    };
+
+    if (days > 0) getDateArr(nextMonth === 0 ? nextYear : year, nextMonth, 1, days, array);
+
+    return array;
+  };
+
+  const pushDay = (dateArr, weekStart) => {
+    for (let i = 0, length = dateArr.length; i < length; i++) {
+      let index = (weekStart + i) % 7;
+      dateArr[i].push(weekArr[index], index);
+    };
+
+    return dateArr;
+  };
+
+  return (...args) => {
+    let nowDate;
+
+    if (args.length === 1) {
+      // 获取当前时间
+      nowDate = new Date();
+    } else if (args.length === 2) {
+      // 自定义开始时间
+      nowDate = new Date(args[1].toString());
+    };
+
+    return pushDay(getDateArr(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), args[0], []), nowDate.getDay());
+  };
+})();
+
+const isChildNode = (child, parent) => {
+  if (child === parent) return true;
+  let target = child;
+
+  while (target && target.nodeType !== 11) {
+    if (target === parent) {
+      return true;
+    } else {
+      target = target.parentNode;
+    };
+  };
+
+  return false;
+};
+
+const $ = {test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, htmlpx2rem, userAgent, autoRootEM, disableScroll, Sticky, getDate, isChildNode};
 export default $;
-export {isType, setCookie, query2json, cookie2json, formatStr, getDate, UA, isChildNode, px2rem, htmlpx2rem, autoRootEM, disableScroll, Sticky, serialize, queryParse, cookieParse};
+export {test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, htmlpx2rem, userAgent, autoRootEM, disableScroll, Sticky, getDate, isChildNode};
