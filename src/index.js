@@ -147,7 +147,7 @@ const setCookie = (name, value, ...options) => {
 
   document.cookie = cookie;
 
-  return cookie2json();
+  return cookieParse();
 };
 
 const isType = (type, obj) => {

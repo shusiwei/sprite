@@ -226,7 +226,7 @@ var setCookie = function (name, value) {
 
   document.cookie = cookie;
 
-  return cookie2json();
+  return cookieParse();
 }.bind(this);
 
 var isType = function (type, obj) {
