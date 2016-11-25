@@ -593,6 +593,6 @@ var isChildNode = function (child, parent) {
   return false;
 }.bind(this);
 
-var $ = { test: test, serialize: serialize, queryParse: queryParse, cookieParse: cookieParse, setCookie: setCookie, px2rem: px2rem, rem2px: rem2px, htmlpx2rem: htmlpx2rem, userAgent: userAgent, autoRootEM: autoRootEM, disableScroll: disableScroll, Sticky: Sticky, getDate: getDate, isChildNode: isChildNode };
-export default $;
+var modules = { test: test, serialize: serialize, queryParse: queryParse, cookieParse: cookieParse, setCookie: setCookie, px2rem: px2rem, rem2px: rem2px, htmlpx2rem: htmlpx2rem, userAgent: userAgent, autoRootEM: autoRootEM, disableScroll: disableScroll, Sticky: Sticky, getDate: getDate, isChildNode: isChildNode };
+export default modules;
 export { test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, htmlpx2rem, userAgent, autoRootEM, disableScroll, Sticky, getDate, isChildNode };

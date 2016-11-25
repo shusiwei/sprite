@@ -410,6 +410,6 @@ const isChildNode = (child, parent) => {
   return false;
 };
 
-const $ = {test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, htmlpx2rem, userAgent, autoRootEM, disableScroll, Sticky, getDate, isChildNode};
-export default $;
+const modules = {test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, htmlpx2rem, userAgent, autoRootEM, disableScroll, Sticky, getDate, isChildNode};
+export default modules;
 export {test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, htmlpx2rem, userAgent, autoRootEM, disableScroll, Sticky, getDate, isChildNode};
