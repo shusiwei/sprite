@@ -171,7 +171,7 @@ const htmlpx2rem = (function() {
 
     if (beforeArr !== null) {
       for (let styleStr of beforeArr) {
-        const temp = styleStr.replace('style="', '').replace(/([\d]+)px/ig, ...args => args[1] / 100 + 'rem').replace(/(font-family:[^;]*(;)?)/ig, '');
+        const temp = styleStr.replace('style="', '').replace(/([\d]+)px/ig, (...args) => args[1] / 100 + 'rem').replace(/(font-family:[^;]*(;)?)/ig, '');
         const tempArry = temp.split(';');
         let tempStr = '';
 

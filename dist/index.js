@@ -261,8 +261,6 @@ var htmlpx2rem = function () {
 
     if (beforeArr !== null) {
       for (var _iterator3 = beforeArr, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-        var _styleStr$replace;
-
         var _ref3;
 
         if (_isArray3) {
@@ -276,11 +274,11 @@ var htmlpx2rem = function () {
 
         var styleStr = _ref3;
 
-        var temp = (_styleStr$replace = styleStr.replace('style="', '')).replace.apply(_styleStr$replace, [/([\d]+)px/ig].concat(function (args) {
+        var temp = styleStr.replace('style="', '').replace(/([\d]+)px/ig, function () {
           _newArrowCheck(this, _this2);
 
-          return args[1] / 100 + 'rem';
-        }.bind(this))).replace(/(font-family:[^;]*(;)?)/ig, '');
+          return (arguments.length <= 1 ? undefined : arguments[1]) / 100 + 'rem';
+        }.bind(this)).replace(/(font-family:[^;]*(;)?)/ig, '');
         var tempArry = temp.split(';');
         var tempStr = '';
 
