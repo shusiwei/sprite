@@ -1,11 +1,11 @@
 /*
- * tyin-node.js
+ * tiny-node.js
  * Description : A modern JavaScript utility library for browser.
  * Coder : shusiwei
  * Date : 2016-08-22
  * Version : 1.0.0
  *
- * https://github.com/shusiwei/tyin-node
+ * https://github.com/shusiwei/tiny-node
  * Licensed under the MIT license.
  */
 import {isPlainObject, isString, includes, forEach, indexOf, isPosiInteger} from 'tiny';
@@ -15,6 +15,25 @@ const documentElement = document.documentElement;
 
 const createElement = (tagName) => document.createElement(tagName);
 const computedStyle = (...args) => window.getComputedStyle(...args);
+
+const addEventListener = (el, fn, ...events) => {
+  if (events.length === 0) throw new Error('at least one event name is required');
+
+  for (let event of events) {
+    el.addEventListener(event, fn);
+  };
+
+  return el;
+};
+const removeEventListener = (el, fn, ...events) => {
+  if (events.length === 0) throw new Error('at least one event name is required');
+
+  for (let event of events) {
+    el.removeEventListener(event, fn);
+  };
+
+  return el;
+};
 
 /**
  * @name 对字符串进行类型测试
@@ -196,95 +215,58 @@ const android = ua.match(/(android);?[\s/]+([\d.]+)?/i);
 const ipad = ua.match(/(ipad).*os\s([\d_]+)/i);
 const ipod = ua.match(/(ipod)(.*os\s([\d_]+))?/i);
 const iphone = !ipad && ua.match(/(iphone\sos)\s([\d_]+)/i);
+const browser = {
+  wechat: indexOf(ua, 'micromessenger'),
+  qq: indexOf(ua, 'qq'),
+  mqq: indexOf(ua, 'mqqbrowser'),
+  uc: indexOf(ua, 'ucbrowser'),
+  safari: indexOf(ua, 'safari'),
+  chrome: indexOf(ua, 'chrome'),
+  firefox: indexOf(ua, 'firefox')
+};
 
-const userAgent = {
-  isiOS: function(ver) {
-    if (ipad || ipod || iphone) {
-      if (!ver) {
-        return true;
-      } else {
-        if (ua.match(/(os)\s([\d_]+)/)[2].replace(/_/g, '.').search(ver) === 0) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    } else {
-      return false;
-    }
-  },
-  isAndroid: function(ver) {
-    if (android) {
-      if (!ver) {
-        return true;
-      } else {
-        if (android[2].search(ver) === 0) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    } else {
-      return false;
-    }
-  },
-  isMobile: function() {
-    return this.isiOS() || this.isAndroid();
-  },
-  isBrowser: (function() {
-    let index = {
-      wechat: indexOf(ua, 'micromessenger'),
-      qq: indexOf(ua, 'qq'),
-      mqq: indexOf(ua, 'mqqbrowser'),
-      uc: indexOf(ua, 'ucbrowser'),
-      safari: indexOf(ua, 'safari'),
-      chrome: indexOf(ua, 'chrome'),
-      firefox: indexOf(ua, 'firefox')
-    };
+const isiOS = (...args) => (ipad || ipod || iphone) && (args.length === 0 || ua.match(/(os)\s([\d_]+)/)[2].replace(/_/g, '.').search(args[0]) === 0);
+const isAndroid = (...args) => android && (args.length === 0 || android[2].search(args[0]) === 0);
+const isBrowser = () => {
+  console.warn('isBrowser is deprecated, please use isWechat/isSafari/isChrome/isFirefox');
+  if (!(name in browser)) return false;
 
-    return function(name) {
-      if (!(name in index)) return false;
-
-      if (name === 'safari') {
-        return index.safari >= 0 && index.chrome === -1;
-      } else if (name === 'qq') {
-        return index.qq >= 0 && index.mqq === -1;
-      } else {
-        return index[name] >= 0;
-      }
-    };
-  })(),
-  isKernel: function(name) {
-    return !!ua.match(name);
-  },
-  isWebkit: function() {
-    return this.isKernel('applewebkit');
+  if (name === 'safari') {
+    return browser.safari >= 0 && browser.chrome === -1;
+  } else if (name === 'qq') {
+    return browser.qq >= 0 && browser.mqq === -1;
+  } else {
+    return browser[name] >= 0;
   }
 };
+const isMobile = () => isiOS() || isAndroid();
+const isKernel = name => !!ua.match(name);
+const isWebkit = () => isKernel('applewebkit');
+const isWechat = () => includes(ua, 'micromessenger');
+const isSafari = () => includes(ua, 'safari') && !includes(ua, 'chrome');
+const isChrome = () => includes(ua, 'chrome');
+const isFirefox = () => includes(ua, 'firefox');
+const userAgent = {isiOS, isAndroid, isBrowser, isKernel, isMobile, isWebkit, isWechat, isSafari, isChrome, isFirefox};
 
 const autoRootEM = (scale) => {
   if (!scale) return;
 
   const getRootSize = () => Math.floor(window.innerWidth / scale * 625) + '%';
-  const remStyle = (function(rootem) {
-    document.head.appendChild(rootem);
-    rootem.type = 'text/css';
-    rootem.id = 'html:root@rem';
-    rootem.sheet.insertRule('html:root{font-size:' + getRootSize() + '}', 0);
+  const styleNode = createElement('style');
 
-    return rootem.sheet.cssRules[0].style;
-  })(createElement('style'));
+  document.head.appendChild(styleNode);
+  styleNode.type = 'text/css';
+  styleNode.id = 'html:root@rem';
+  styleNode.sheet.insertRule('html:root{font-size:' + getRootSize() + '}', 0);
+
+  const remStyle = styleNode.sheet.cssRules[0].style;
   const update = (evt) => {
     if (evt && evt.type === 'orientationchange') setTimeout(update, 50);
     return (remStyle.fontSize = getRootSize());
   };
 
-  window.addEventListener('resize', update);
-  window.addEventListener('load', update);
-  window.addEventListener('orientationchange', update);
-
-  document.addEventListener('DOMContentLoaded', update);
-  document.addEventListener('readystatechange', update);
+  addEventListener(window, update, 'resize', 'load', 'orientationchange');
+  addEventListener(document, update, 'DOMContentLoaded', 'readystatechange');
 
   return update();
 };
@@ -297,15 +279,13 @@ const disableScroll = (function() {
   return (...args) => {
     if (args.length === 0 || args[0] === true) {
       // 禁用默认事件，防止页面滚动
-      document.body.addEventListener('touchmove', preventEvent);
-      document.addEventListener('mousewheel', preventEvent);
-      document.addEventListener('keydown', preventEvent);
+      addEventListener(document.body, preventEvent, 'touchmove');
+      addEventListener(document, preventEvent, 'mousewheel', 'keydown');
 
       return true;
     } else if (args[0] === false) {
-      document.body.removeEventListener('touchmove', preventEvent);
-      document.removeEventListener('mousewheel', preventEvent);
-      document.removeEventListener('keydown', preventEvent);
+      removeEventListener(document.body, preventEvent, 'touchmove');
+      removeEventListener(document, preventEvent, 'mousewheel', 'keydown');
 
       return false;
     };
@@ -338,12 +318,10 @@ class Sticky {
   bind() {
     this.event = () => this.updatePosition();
 
-    window.addEventListener('resize', this.event);
-    window.addEventListener('scroll', this.event);
+    addEventListener(window, this.event, 'resize', 'scroll');
   }
   destroy() {
-    window.removeEventListener('resize', this.event);
-    window.removeEventListener('scroll', this.event);
+    removeEventListener(window, this.event, 'resize', 'scroll');
   }
 };
 
