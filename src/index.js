@@ -8,32 +8,38 @@
  * https://github.com/shusiwei/tiny-node
  * Licensed under the MIT license.
  */
-import {isPlainObject, isString, includes, forEach, indexOf, isPosiInteger} from 'tiny';
+import {isPlainObject, isString, forEach, isPosiInteger} from 'tiny';
 
 const document = window.document;
 const documentElement = document.documentElement;
 
-const createElement = (tagName) => document.createElement(tagName);
 const computedStyle = (...args) => window.getComputedStyle(...args);
 
-const addEventListener = (el, fn, ...events) => {
-  if (events.length === 0) throw new Error('at least one event name is required');
+const addEventListener = (el, fn, ...types) => {
+  if (types.length === 0) throw new Error('at least one event name is required');
 
-  for (let event of events) {
-    el.addEventListener(event, fn);
+  for (let type of types) {
+    el.addEventListener(type, fn);
   };
 
   return el;
 };
-const removeEventListener = (el, fn, ...events) => {
-  if (events.length === 0) throw new Error('at least one event name is required');
+const removeEventListener = (el, fn, ...types) => {
+  if (types.length === 0) throw new Error('at least one event name is required');
 
-  for (let event of events) {
-    el.removeEventListener(event, fn);
+  for (let type of types) {
+    el.removeEventListener(type, fn);
   };
 
   return el;
 };
+
+/**
+ * @name 创建一个带有类似数组长度的Object对象
+ *
+ * @return 返回该对象
+ */
+const makeArrayLikeObject = () => Object.defineProperty({}, 'length', {value: 0, writable: true, enumerable: false});
 
 /**
  * @name 对字符串进行类型测试
@@ -107,7 +113,7 @@ const serialize = (...sources) => {
 const queryParse = (source, ...keys) => {
   if (!isString(source)) throw new TypeError('source must b a String');
 
-  const result = Object.defineProperty({}, 'length', {value: 0, writable: true, enumerable: false});
+  const result = makeArrayLikeObject();
 
   forEach(source.replace(/^\?/, '').split('&'), string => {
     const item = string.split('=');
@@ -119,14 +125,14 @@ const queryParse = (source, ...keys) => {
   if (keys.length === 0) return result;
   if (keys.length === 1) return result[keys[0]];
 
-  const dump = Object.defineProperty({}, 'length', {value: 0, writable: true, enumerable: false});
+  const dumpData = makeArrayLikeObject();
 
   forEach(keys, key => {
-    dump[key] = result[key];
-    dump.length++;
+    dumpData[key] = result[key];
+    dumpData.length++;
   });
 
-  return dump;
+  return dumpData;
 };
 
 /**
@@ -176,122 +182,6 @@ const px2rem = (value) => parseFloat(value) / parseInt(computedStyle(documentEle
 
 const rem2px = (value) => parseFloat(value) * parseInt(computedStyle(documentElement, ':root').fontSize);
 
-const htmlpx2rem = (function() {
-  const styleRegex = /style="([^"]+)"/ig;
-  const classRegex = /class="([^"]+)"/ig;
-
-  return function(html) {
-    if (!isString(html)) return html;
-
-    const beforeArr = html.match(styleRegex);
-    const afterArr = [];
-    const placeholder = '{{#}}';
-    let newHtml = html.replace(styleRegex, placeholder).replace(classRegex, '');
-
-    if (beforeArr !== null) {
-      for (let styleStr of beforeArr) {
-        const temp = styleStr.replace('style="', '').replace(/([\d]+)px/ig, (...args) => args[1] / 100 + 'rem').replace(/(font-family:[^;]*(;)?)/ig, '');
-        const tempArry = temp.split(';');
-        let tempStr = '';
-
-        for (let styleRule of tempArry) {
-          if (styleRule && includes(styleRule, ':')) tempStr += styleRule.trim().toLowerCase().replace(': ', ':') + ';';
-        };
-
-        afterArr.push('style="' + tempStr + '"');
-      };
-    };
-
-    for (let styleStr of afterArr) {
-      newHtml = newHtml.replace(placeholder, styleStr);
-    };
-
-    return newHtml;
-  };
-}());
-
-const ua = navigator.userAgent.toLowerCase();
-const android = ua.match(/(android);?[\s/]+([\d.]+)?/i);
-const ipad = ua.match(/(ipad).*os\s([\d_]+)/i);
-const ipod = ua.match(/(ipod)(.*os\s([\d_]+))?/i);
-const iphone = !ipad && ua.match(/(iphone\sos)\s([\d_]+)/i);
-const browser = {
-  wechat: indexOf(ua, 'micromessenger'),
-  qq: indexOf(ua, 'qq'),
-  mqq: indexOf(ua, 'mqqbrowser'),
-  uc: indexOf(ua, 'ucbrowser'),
-  safari: indexOf(ua, 'safari'),
-  chrome: indexOf(ua, 'chrome'),
-  firefox: indexOf(ua, 'firefox')
-};
-
-const isiOS = (...args) => (ipad || ipod || iphone) && (args.length === 0 || ua.match(/(os)\s([\d_]+)/)[2].replace(/_/g, '.').search(args[0]) === 0);
-const isAndroid = (...args) => android && (args.length === 0 || android[2].search(args[0]) === 0);
-const isBrowser = () => {
-  console.warn('isBrowser is deprecated, please use isWechat/isSafari/isChrome/isFirefox');
-  if (!(name in browser)) return false;
-
-  if (name === 'safari') {
-    return browser.safari >= 0 && browser.chrome === -1;
-  } else if (name === 'qq') {
-    return browser.qq >= 0 && browser.mqq === -1;
-  } else {
-    return browser[name] >= 0;
-  }
-};
-const isMobile = () => isiOS() || isAndroid();
-const isKernel = name => !!ua.match(name);
-const isWebkit = () => isKernel('applewebkit');
-const isWechat = () => includes(ua, 'micromessenger');
-const isSafari = () => includes(ua, 'safari') && !includes(ua, 'chrome');
-const isChrome = () => includes(ua, 'chrome');
-const isFirefox = () => includes(ua, 'firefox');
-const userAgent = {isiOS, isAndroid, isBrowser, isKernel, isMobile, isWebkit, isWechat, isSafari, isChrome, isFirefox};
-
-const autoRootEM = (scale) => {
-  if (!scale) return;
-
-  const getRootSize = () => Math.floor(window.innerWidth / scale * 625) + '%';
-  const styleNode = createElement('style');
-
-  document.head.appendChild(styleNode);
-  styleNode.type = 'text/css';
-  styleNode.id = 'html:root@rem';
-  styleNode.sheet.insertRule('html:root{font-size:' + getRootSize() + '}', 0);
-
-  const remStyle = styleNode.sheet.cssRules[0].style;
-  const update = (evt) => {
-    if (evt && evt.type === 'orientationchange') setTimeout(update, 50);
-    return (remStyle.fontSize = getRootSize());
-  };
-
-  addEventListener(window, update, 'resize', 'load', 'orientationchange');
-  addEventListener(document, update, 'DOMContentLoaded', 'readystatechange');
-
-  return update();
-};
-
-const disableScroll = (function() {
-  const preventEvent = (evt) => {
-    if ((evt.type === 'keydown' && evt.keyCode >= 33 && evt.keyCode <= 40) || evt.type === 'touchmove' || evt.type === 'mousewheel') evt.preventDefault();
-  };
-
-  return (...args) => {
-    if (args.length === 0 || args[0] === true) {
-      // 禁用默认事件，防止页面滚动
-      addEventListener(document.body, preventEvent, 'touchmove');
-      addEventListener(document, preventEvent, 'mousewheel', 'keydown');
-
-      return true;
-    } else if (args[0] === false) {
-      removeEventListener(document.body, preventEvent, 'touchmove');
-      removeEventListener(document, preventEvent, 'mousewheel', 'keydown');
-
-      return false;
-    };
-  };
-})();
-
 class Sticky {
   constructor(target, body) {
     this.target = target;
@@ -325,54 +215,6 @@ class Sticky {
   }
 };
 
-const getDate = (function() {
-  // 周
-  const weekArr = ['日', '一', '二', '三', '四', '五', '六'];
-
-  const dateFixed = (number, fix) => ('0' + (number + fix)).slice(-2);
-
-  const getDateArr = (year, month, date, days, array) => {
-    // 每个月多少天
-    const nowDays = [31, year % 4 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    // 明年
-    const nextYear = year + 1;
-    // 下个月
-    const nextMonth = month === 11 ? 0 : month + 1;
-
-    for (let i = date; i <= nowDays[month]; i++) {
-      array.push([year, dateFixed(month, 1), dateFixed(i, 0)]);
-      if (--days === 0) break;
-    };
-
-    if (days > 0) getDateArr(nextMonth === 0 ? nextYear : year, nextMonth, 1, days, array);
-
-    return array;
-  };
-
-  const pushDay = (dateArr, weekStart) => {
-    for (let i = 0, length = dateArr.length; i < length; i++) {
-      let index = (weekStart + i) % 7;
-      dateArr[i].push(weekArr[index], index);
-    };
-
-    return dateArr;
-  };
-
-  return (...args) => {
-    let nowDate;
-
-    if (args.length === 1) {
-      // 获取当前时间
-      nowDate = new Date();
-    } else if (args.length === 2) {
-      // 自定义开始时间
-      nowDate = new Date(args[1].toString());
-    };
-
-    return pushDay(getDateArr(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), args[0], []), nowDate.getDay());
-  };
-})();
-
 const isChildNode = (child, parent) => {
   if (child === parent) return true;
   let target = child;
@@ -388,6 +230,6 @@ const isChildNode = (child, parent) => {
   return false;
 };
 
-const modules = {test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, htmlpx2rem, userAgent, autoRootEM, disableScroll, Sticky, getDate, isChildNode};
+const modules = {test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, Sticky, isChildNode};
 export default modules;
-export {test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, htmlpx2rem, userAgent, autoRootEM, disableScroll, Sticky, getDate, isChildNode};
+export {test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, Sticky, isChildNode};

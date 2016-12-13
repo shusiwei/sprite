@@ -14,16 +14,11 @@ function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { t
  * https://github.com/shusiwei/tiny-node
  * Licensed under the MIT license.
  */
-import { isPlainObject, isString, includes, forEach, indexOf, isPosiInteger } from 'tiny';
+import { isPlainObject, isString, forEach, isPosiInteger } from 'tiny';
 
 var document = window.document;
 var documentElement = document.documentElement;
 
-var createElement = function (tagName) {
-  _newArrowCheck(this, _this);
-
-  return document.createElement(tagName);
-}.bind(this);
 var computedStyle = function () {
   var _window;
 
@@ -33,15 +28,15 @@ var computedStyle = function () {
 }.bind(this);
 
 var addEventListener = function (el, fn) {
-  for (var _len = arguments.length, events = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-    events[_key - 2] = arguments[_key];
+  for (var _len = arguments.length, types = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+    types[_key - 2] = arguments[_key];
   }
 
   _newArrowCheck(this, _this);
 
-  if (events.length === 0) throw new Error('at least one event name is required');
+  if (types.length === 0) throw new Error('at least one event name is required');
 
-  for (var _iterator = events, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+  for (var _iterator = types, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
     var _ref;
 
     if (_isArray) {
@@ -53,23 +48,23 @@ var addEventListener = function (el, fn) {
       _ref = _i.value;
     }
 
-    var event = _ref;
+    var type = _ref;
 
-    el.addEventListener(event, fn);
+    el.addEventListener(type, fn);
   };
 
   return el;
 }.bind(this);
 var removeEventListener = function (el, fn) {
-  for (var _len2 = arguments.length, events = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-    events[_key2 - 2] = arguments[_key2];
+  for (var _len2 = arguments.length, types = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+    types[_key2 - 2] = arguments[_key2];
   }
 
   _newArrowCheck(this, _this);
 
-  if (events.length === 0) throw new Error('at least one event name is required');
+  if (types.length === 0) throw new Error('at least one event name is required');
 
-  for (var _iterator2 = events, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+  for (var _iterator2 = types, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
     var _ref2;
 
     if (_isArray2) {
@@ -81,12 +76,23 @@ var removeEventListener = function (el, fn) {
       _ref2 = _i2.value;
     }
 
-    var event = _ref2;
+    var type = _ref2;
 
-    el.removeEventListener(event, fn);
+    el.removeEventListener(type, fn);
   };
 
   return el;
+}.bind(this);
+
+/**
+ * @name 创建一个带有类似数组长度的Object对象
+ *
+ * @return 返回该对象
+ */
+var makeArrayLikeObject = function () {
+  _newArrowCheck(this, _this);
+
+  return Object.defineProperty({}, 'length', { value: 0, writable: true, enumerable: false });
 }.bind(this);
 
 /**
@@ -194,7 +200,7 @@ var queryParse = function (source) {
 
   if (!isString(source)) throw new TypeError('source must b a String');
 
-  var result = Object.defineProperty({}, 'length', { value: 0, writable: true, enumerable: false });
+  var result = makeArrayLikeObject();
 
   forEach(source.replace(/^\?/, '').split('&'), function (string) {
     _newArrowCheck(this, _this);
@@ -208,16 +214,16 @@ var queryParse = function (source) {
   if (keys.length === 0) return result;
   if (keys.length === 1) return result[keys[0]];
 
-  var dump = Object.defineProperty({}, 'length', { value: 0, writable: true, enumerable: false });
+  var dumpData = makeArrayLikeObject();
 
   forEach(keys, function (key) {
     _newArrowCheck(this, _this);
 
-    dump[key] = result[key];
-    dump.length++;
+    dumpData[key] = result[key];
+    dumpData.length++;
   }.bind(this));
 
-  return dump;
+  return dumpData;
 }.bind(this);
 
 /**
@@ -302,219 +308,6 @@ var rem2px = function (value) {
   return parseFloat(value) * parseInt(computedStyle(documentElement, ':root').fontSize);
 }.bind(this);
 
-var htmlpx2rem = function () {
-  var styleRegex = /style="([^"]+)"/ig;
-  var classRegex = /class="([^"]+)"/ig;
-
-  return function (html) {
-    var _this2 = this;
-
-    if (!isString(html)) return html;
-
-    var beforeArr = html.match(styleRegex);
-    var afterArr = [];
-    var placeholder = '{{#}}';
-    var newHtml = html.replace(styleRegex, placeholder).replace(classRegex, '');
-
-    if (beforeArr !== null) {
-      for (var _iterator5 = beforeArr, _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
-        var _ref5;
-
-        if (_isArray5) {
-          if (_i5 >= _iterator5.length) break;
-          _ref5 = _iterator5[_i5++];
-        } else {
-          _i5 = _iterator5.next();
-          if (_i5.done) break;
-          _ref5 = _i5.value;
-        }
-
-        var styleStr = _ref5;
-
-        var temp = styleStr.replace('style="', '').replace(/([\d]+)px/ig, function () {
-          _newArrowCheck(this, _this2);
-
-          return (arguments.length <= 1 ? undefined : arguments[1]) / 100 + 'rem';
-        }.bind(this)).replace(/(font-family:[^;]*(;)?)/ig, '');
-        var tempArry = temp.split(';');
-        var tempStr = '';
-
-        for (var _iterator6 = tempArry, _isArray6 = Array.isArray(_iterator6), _i6 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator]();;) {
-          var _ref6;
-
-          if (_isArray6) {
-            if (_i6 >= _iterator6.length) break;
-            _ref6 = _iterator6[_i6++];
-          } else {
-            _i6 = _iterator6.next();
-            if (_i6.done) break;
-            _ref6 = _i6.value;
-          }
-
-          var styleRule = _ref6;
-
-          if (styleRule && includes(styleRule, ':')) tempStr += styleRule.trim().toLowerCase().replace(': ', ':') + ';';
-        };
-
-        afterArr.push('style="' + tempStr + '"');
-      };
-    };
-
-    for (var _iterator7 = afterArr, _isArray7 = Array.isArray(_iterator7), _i7 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {
-      var _ref7;
-
-      if (_isArray7) {
-        if (_i7 >= _iterator7.length) break;
-        _ref7 = _iterator7[_i7++];
-      } else {
-        _i7 = _iterator7.next();
-        if (_i7.done) break;
-        _ref7 = _i7.value;
-      }
-
-      var _styleStr = _ref7;
-
-      newHtml = newHtml.replace(placeholder, _styleStr);
-    };
-
-    return newHtml;
-  };
-}();
-
-var ua = navigator.userAgent.toLowerCase();
-var android = ua.match(/(android);?[\s/]+([\d.]+)?/i);
-var ipad = ua.match(/(ipad).*os\s([\d_]+)/i);
-var ipod = ua.match(/(ipod)(.*os\s([\d_]+))?/i);
-var iphone = !ipad && ua.match(/(iphone\sos)\s([\d_]+)/i);
-var browser = {
-  wechat: indexOf(ua, 'micromessenger'),
-  qq: indexOf(ua, 'qq'),
-  mqq: indexOf(ua, 'mqqbrowser'),
-  uc: indexOf(ua, 'ucbrowser'),
-  safari: indexOf(ua, 'safari'),
-  chrome: indexOf(ua, 'chrome'),
-  firefox: indexOf(ua, 'firefox')
-};
-
-var isiOS = function () {
-  _newArrowCheck(this, _this);
-
-  return (ipad || ipod || iphone) && (arguments.length === 0 || ua.match(/(os)\s([\d_]+)/)[2].replace(/_/g, '.').search(arguments.length <= 0 ? undefined : arguments[0]) === 0);
-}.bind(this);
-var isAndroid = function () {
-  _newArrowCheck(this, _this);
-
-  return android && (arguments.length === 0 || android[2].search(arguments.length <= 0 ? undefined : arguments[0]) === 0);
-}.bind(this);
-var isBrowser = function () {
-  _newArrowCheck(this, _this);
-
-  console.warn('isBrowser is deprecated, please use isWechat/isSafari/isChrome/isFirefox');
-  if (!(name in browser)) return false;
-
-  if (name === 'safari') {
-    return browser.safari >= 0 && browser.chrome === -1;
-  } else if (name === 'qq') {
-    return browser.qq >= 0 && browser.mqq === -1;
-  } else {
-    return browser[name] >= 0;
-  }
-}.bind(this);
-var isMobile = function () {
-  _newArrowCheck(this, _this);
-
-  return isiOS() || isAndroid();
-}.bind(this);
-var isKernel = function (name) {
-  _newArrowCheck(this, _this);
-
-  return !!ua.match(name);
-}.bind(this);
-var isWebkit = function () {
-  _newArrowCheck(this, _this);
-
-  return isKernel('applewebkit');
-}.bind(this);
-var isWechat = function () {
-  _newArrowCheck(this, _this);
-
-  return includes(ua, 'micromessenger');
-}.bind(this);
-var isSafari = function () {
-  _newArrowCheck(this, _this);
-
-  return includes(ua, 'safari') && !includes(ua, 'chrome');
-}.bind(this);
-var isChrome = function () {
-  _newArrowCheck(this, _this);
-
-  return includes(ua, 'chrome');
-}.bind(this);
-var isFirefox = function () {
-  _newArrowCheck(this, _this);
-
-  return includes(ua, 'firefox');
-}.bind(this);
-var userAgent = { isiOS: isiOS, isAndroid: isAndroid, isBrowser: isBrowser, isKernel: isKernel, isMobile: isMobile, isWebkit: isWebkit, isWechat: isWechat, isSafari: isSafari, isChrome: isChrome, isFirefox: isFirefox };
-
-var autoRootEM = function (scale) {
-  _newArrowCheck(this, _this);
-
-  if (!scale) return;
-
-  var getRootSize = function () {
-    _newArrowCheck(this, _this);
-
-    return Math.floor(window.innerWidth / scale * 625) + '%';
-  }.bind(this);
-  var styleNode = createElement('style');
-
-  document.head.appendChild(styleNode);
-  styleNode.type = 'text/css';
-  styleNode.id = 'html:root@rem';
-  styleNode.sheet.insertRule('html:root{font-size:' + getRootSize() + '}', 0);
-
-  var remStyle = styleNode.sheet.cssRules[0].style;
-  var update = function (evt) {
-    _newArrowCheck(this, _this);
-
-    if (evt && evt.type === 'orientationchange') setTimeout(update, 50);
-    return remStyle.fontSize = getRootSize();
-  }.bind(this);
-
-  addEventListener(window, update, 'resize', 'load', 'orientationchange');
-  addEventListener(document, update, 'DOMContentLoaded', 'readystatechange');
-
-  return update();
-}.bind(this);
-
-var disableScroll = function () {
-  var _this3 = this;
-
-  var preventEvent = function (evt) {
-    _newArrowCheck(this, _this3);
-
-    if (evt.type === 'keydown' && evt.keyCode >= 33 && evt.keyCode <= 40 || evt.type === 'touchmove' || evt.type === 'mousewheel') evt.preventDefault();
-  }.bind(this);
-
-  return function () {
-    _newArrowCheck(this, _this3);
-
-    if (arguments.length === 0 || (arguments.length <= 0 ? undefined : arguments[0]) === true) {
-      // 禁用默认事件，防止页面滚动
-      addEventListener(document.body, preventEvent, 'touchmove');
-      addEventListener(document, preventEvent, 'mousewheel', 'keydown');
-
-      return true;
-    } else if ((arguments.length <= 0 ? undefined : arguments[0]) === false) {
-      removeEventListener(document.body, preventEvent, 'touchmove');
-      removeEventListener(document, preventEvent, 'mousewheel', 'keydown');
-
-      return false;
-    };
-  }.bind(this);
-}();
-
 var Sticky = function () {
   function Sticky(target, body) {
     _classCallCheck(this, Sticky);
@@ -544,10 +337,10 @@ var Sticky = function () {
   };
 
   Sticky.prototype.bind = function bind() {
-    var _this4 = this;
+    var _this2 = this;
 
     this.event = function () {
-      _newArrowCheck(this, _this4);
+      _newArrowCheck(this, _this2);
 
       return this.updatePosition();
     }.bind(this);
@@ -563,70 +356,6 @@ var Sticky = function () {
 }();
 
 ;
-
-var getDate = function () {
-  var _this5 = this;
-
-  // 周
-  var weekArr = ['日', '一', '二', '三', '四', '五', '六'];
-
-  var dateFixed = function (number, fix) {
-    _newArrowCheck(this, _this5);
-
-    return ('0' + (number + fix)).slice(-2);
-  }.bind(this);
-
-  var getDateArr = function (year, month, date, days, array) {
-    _newArrowCheck(this, _this5);
-
-    // 每个月多少天
-    var nowDays = [31, year % 4 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    // 明年
-    var nextYear = year + 1;
-    // 下个月
-    var nextMonth = month === 11 ? 0 : month + 1;
-
-    for (var i = date; i <= nowDays[month]; i++) {
-      array.push([year, dateFixed(month, 1), dateFixed(i, 0)]);
-      if (--days === 0) break;
-    };
-
-    if (days > 0) getDateArr(nextMonth === 0 ? nextYear : year, nextMonth, 1, days, array);
-
-    return array;
-  }.bind(this);
-
-  var pushDay = function (dateArr, weekStart) {
-    _newArrowCheck(this, _this5);
-
-    for (var i = 0, length = dateArr.length; i < length; i++) {
-      var index = (weekStart + i) % 7;
-      dateArr[i].push(weekArr[index], index);
-    };
-
-    return dateArr;
-  }.bind(this);
-
-  return function () {
-    for (var _len7 = arguments.length, args = Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
-      args[_key7] = arguments[_key7];
-    }
-
-    _newArrowCheck(this, _this5);
-
-    var nowDate = void 0;
-
-    if (args.length === 1) {
-      // 获取当前时间
-      nowDate = new Date();
-    } else if (args.length === 2) {
-      // 自定义开始时间
-      nowDate = new Date(args[1].toString());
-    };
-
-    return pushDay(getDateArr(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), args[0], []), nowDate.getDay());
-  }.bind(this);
-}();
 
 var isChildNode = function (child, parent) {
   _newArrowCheck(this, _this);
@@ -645,6 +374,6 @@ var isChildNode = function (child, parent) {
   return false;
 }.bind(this);
 
-var modules = { test: test, serialize: serialize, queryParse: queryParse, cookieParse: cookieParse, setCookie: setCookie, px2rem: px2rem, rem2px: rem2px, htmlpx2rem: htmlpx2rem, userAgent: userAgent, autoRootEM: autoRootEM, disableScroll: disableScroll, Sticky: Sticky, getDate: getDate, isChildNode: isChildNode };
+var modules = { test: test, serialize: serialize, queryParse: queryParse, cookieParse: cookieParse, setCookie: setCookie, px2rem: px2rem, rem2px: rem2px, Sticky: Sticky, isChildNode: isChildNode };
 export default modules;
-export { test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, htmlpx2rem, userAgent, autoRootEM, disableScroll, Sticky, getDate, isChildNode };
+export { test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, Sticky, isChildNode };
