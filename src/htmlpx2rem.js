@@ -1,4 +1,4 @@
-import {isString, isFunction, forEach, includes, trim} from 'tiny';
+import {isString, isArray, forEach, includes, trim} from 'tiny';
 
 const styleRegex = /style="([^"]+)"/ig;
 const classRegex = /class="([^"]+)"/ig;
@@ -11,7 +11,7 @@ export default (html) => {
   const placeholder = '{#}';
   let newHtml = html.replace(styleRegex, placeholder).replace(classRegex, '');
 
-  if (isFunction(beforeArr)) {
+  if (isArray(beforeArr)) {
     forEach(beforeArr, styleStr => {
       const temp = styleStr.replace('style="', '').replace(/([\d]+)px/ig, (...args) => args[1] / 100 + 'rem').replace(/(font-family:[^;]*(;)?)/ig, '');
       const tempArry = temp.split(';');

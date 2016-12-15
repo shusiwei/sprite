@@ -2,7 +2,7 @@ var _this = this;
 
 function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
-import { isString, isFunction, forEach, includes, trim } from 'tiny';
+import { isString, isArray, forEach, includes, trim } from 'tiny';
 
 var styleRegex = /style="([^"]+)"/ig;
 var classRegex = /class="([^"]+)"/ig;
@@ -17,7 +17,7 @@ export default (function (html) {
   var placeholder = '{#}';
   var newHtml = html.replace(styleRegex, placeholder).replace(classRegex, '');
 
-  if (isFunction(beforeArr)) {
+  if (isArray(beforeArr)) {
     forEach(beforeArr, function (styleStr) {
       _newArrowCheck(this, _this);
 

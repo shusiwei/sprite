@@ -1,11 +1,11 @@
 {
   "name": "tiny-node",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A modern JavaScript utility library for browser",
   "main": "dist/index.js",
   "scripts": {
-    "eslint": "./node_modules/.bin/eslint src",
-    "build": "./node_modules/.bin/babel src -d dist"
+    "eslint": "eslint src",
+    "build": "npm run eslint && babel src -d dist"
   },
   "repository": {
     "type": "git",
