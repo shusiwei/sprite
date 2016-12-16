@@ -149,8 +149,7 @@ const cookieParse = (...keys) => queryParse(document.cookie.replace(/; /g, '&'),
  *
  * @params {String} name * cookie名称
  * @params {String} value * cookie值
- * @params {Number} expires 过期天数
- * @params {Object} options 其它参数
+ * @params {Object} options 过期天数&其它参数
  * @params {String} options.path cookie所在路径
  * @params {String} options.domain cookie所在域
  * @params {String} options.secure cookie是否只允许在安全链接中读取
@@ -166,10 +165,10 @@ const setCookie = (name, value, ...options) => {
       cookie += ';expires=' + date.toGMTString();
     };
 
-    if (isPlainObject(options)) {
-      if (options.path) cookie += ';path=' + options.path;
-      if (options.domain) cookie += ';domain=' + options.domain;
-      if (options.secure) cookie += ';secure=' + options.secure;
+    if (isPlainObject(option)) {
+      if (option.path) cookie += ';path=' + option.path;
+      if (option.domain) cookie += ';domain=' + option.domain;
+      if (option.secure) cookie += ';secure=' + option.secure;
     };
   };
 
