@@ -11,9 +11,6 @@
 import {isPlainObject, isString, forEach, isPosiInteger} from 'tiny';
 
 const document = window.document;
-const documentElement = document.documentElement;
-
-const computedStyle = (...args) => window.getComputedStyle(...args);
 
 const addEventListener = (el, fn, ...types) => {
   if (types.length === 0) throw new Error('at least one event name is required');
@@ -177,16 +174,12 @@ const setCookie = (name, value, ...options) => {
   return cookieParse();
 };
 
-const px2rem = (value) => parseFloat(value) / parseInt(computedStyle(documentElement, ':root').fontSize) + 'rem';
-
-const rem2px = (value) => parseFloat(value) * parseInt(computedStyle(documentElement, ':root').fontSize);
-
 class Sticky {
   constructor(target, body) {
     this.target = target;
     this.body = body;
 
-    this.position = computedStyle(this.target).position;
+    this.position = window.getComputedStyle(this.target).position;
 
     this.bind();
     this.updatePosition();
@@ -229,6 +222,6 @@ const isChildNode = (child, parent) => {
   return false;
 };
 
-const modules = {test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, Sticky, isChildNode};
+const modules = {test, serialize, queryParse, cookieParse, setCookie, Sticky, isChildNode};
 export default modules;
-export {test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, Sticky, isChildNode};
+export {test, serialize, queryParse, cookieParse, setCookie, Sticky, isChildNode};

@@ -17,15 +17,6 @@ function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { t
 import { isPlainObject, isString, forEach, isPosiInteger } from 'tiny';
 
 var document = window.document;
-var documentElement = document.documentElement;
-
-var computedStyle = function () {
-  var _window;
-
-  _newArrowCheck(this, _this);
-
-  return (_window = window).getComputedStyle.apply(_window, arguments);
-}.bind(this);
 
 var addEventListener = function (el, fn) {
   for (var _len = arguments.length, types = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
@@ -295,18 +286,6 @@ var setCookie = function (name, value) {
   return cookieParse();
 }.bind(this);
 
-var px2rem = function (value) {
-  _newArrowCheck(this, _this);
-
-  return parseFloat(value) / parseInt(computedStyle(documentElement, ':root').fontSize) + 'rem';
-}.bind(this);
-
-var rem2px = function (value) {
-  _newArrowCheck(this, _this);
-
-  return parseFloat(value) * parseInt(computedStyle(documentElement, ':root').fontSize);
-}.bind(this);
-
 var Sticky = function () {
   function Sticky(target, body) {
     _classCallCheck(this, Sticky);
@@ -314,7 +293,7 @@ var Sticky = function () {
     this.target = target;
     this.body = body;
 
-    this.position = computedStyle(this.target).position;
+    this.position = window.getComputedStyle(this.target).position;
 
     this.bind();
     this.updatePosition();
@@ -373,6 +352,6 @@ var isChildNode = function (child, parent) {
   return false;
 }.bind(this);
 
-var modules = { test: test, serialize: serialize, queryParse: queryParse, cookieParse: cookieParse, setCookie: setCookie, px2rem: px2rem, rem2px: rem2px, Sticky: Sticky, isChildNode: isChildNode };
+var modules = { test: test, serialize: serialize, queryParse: queryParse, cookieParse: cookieParse, setCookie: setCookie, Sticky: Sticky, isChildNode: isChildNode };
 export default modules;
-export { test, serialize, queryParse, cookieParse, setCookie, px2rem, rem2px, Sticky, isChildNode };
+export { test, serialize, queryParse, cookieParse, setCookie, Sticky, isChildNode };
