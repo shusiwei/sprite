@@ -30,30 +30,10 @@ var isKernel = function (name) {
 
   return !!ua.match(name);
 }.bind(this);
-var isWebkit = function () {
-  _newArrowCheck(this, _this);
-
-  return isKernel('applewebkit');
-}.bind(this);
-var isWechat = function () {
-  _newArrowCheck(this, _this);
-
-  return includes(ua, 'micromessenger');
-}.bind(this);
-var isSafari = function () {
-  _newArrowCheck(this, _this);
-
-  return includes(ua, 'safari') && !includes(ua, 'chrome');
-}.bind(this);
-var isChrome = function () {
-  _newArrowCheck(this, _this);
-
-  return includes(ua, 'chrome');
-}.bind(this);
-var isFirefox = function () {
-  _newArrowCheck(this, _this);
-
-  return includes(ua, 'firefox');
-}.bind(this);
+var isWebkit = isKernel('applewebkit');
+var isWechat = includes(ua, 'micromessenger');
+var isSafari = includes(ua, 'safari') && !includes(ua, 'chrome');
+var isChrome = includes(ua, 'chrome');
+var isFirefox = includes(ua, 'firefox');
 
 export { isiOS, isAndroid, isKernel, isMobile, isWebkit, isWechat, isSafari, isChrome, isFirefox };

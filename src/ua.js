@@ -10,10 +10,10 @@ const isiOS = (...args) => (ipad || ipod || iphone) && (args.length === 0 || ua.
 const isAndroid = (...args) => android && (args.length === 0 || android[2].search(args[0]) === 0);
 const isMobile = () => isiOS() || isAndroid();
 const isKernel = name => !!ua.match(name);
-const isWebkit = () => isKernel('applewebkit');
-const isWechat = () => includes(ua, 'micromessenger');
-const isSafari = () => includes(ua, 'safari') && !includes(ua, 'chrome');
-const isChrome = () => includes(ua, 'chrome');
-const isFirefox = () => includes(ua, 'firefox');
+const isWebkit = isKernel('applewebkit');
+const isWechat = includes(ua, 'micromessenger');
+const isSafari = includes(ua, 'safari') && !includes(ua, 'chrome');
+const isChrome = includes(ua, 'chrome');
+const isFirefox = includes(ua, 'firefox');
 
 export {isiOS, isAndroid, isKernel, isMobile, isWebkit, isWechat, isSafari, isChrome, isFirefox};
