@@ -311,7 +311,7 @@ var Sticky = function () {
     var targetRect = this.target.getBoundingClientRect();
     var bodyRect = this.body.getBoundingClientRect();
 
-    return Math.abs(bodyRect.top) + bodyRect.height + targetRect.height > window.outerHeight;
+    return Math.abs(bodyRect.top) + bodyRect.height + targetRect.height > window.innerHeight;
   };
 
   Sticky.prototype.bind = function bind() {

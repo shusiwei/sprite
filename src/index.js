@@ -195,7 +195,7 @@ class Sticky {
     const targetRect = this.target.getBoundingClientRect();
     const bodyRect = this.body.getBoundingClientRect();
 
-    return Math.abs(bodyRect.top) + bodyRect.height + targetRect.height > window.outerHeight;
+    return Math.abs(bodyRect.top) + bodyRect.height + targetRect.height > window.innerHeight;
   }
   bind() {
     this.event = () => this.updatePosition();
