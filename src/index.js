@@ -176,15 +176,17 @@ const setCookie = (name, value, ...options) => {
 
 class Sticky {
   constructor(target, body) {
+    this.placeholder = document.createElement('div');
     this.target = target;
     this.body = body;
+    this.body.appendChild(this.placeholder);
 
     this.position = window.getComputedStyle(this.target).position;
 
     this.bind();
-    this.updatePosition();
+    this.update();
   }
-  updatePosition() {
+  update() {
     if (this.checkIsHit()) {
       this.target.style.position = this.position;
     } else {
@@ -195,10 +197,12 @@ class Sticky {
     const targetRect = this.target.getBoundingClientRect();
     const bodyRect = this.body.getBoundingClientRect();
 
-    return Math.abs(bodyRect.top) + bodyRect.height + targetRect.height > window.innerHeight;
+    this.placeholder.style.height = targetRect.height + 'px';
+
+    return window.innerHeight - bodyRect.bottom < targetRect.height;
   }
   bind() {
-    this.event = () => this.updatePosition();
+    this.event = () => this.update();
 
     addEventListener(window, this.event, 'resize', 'scroll');
   }

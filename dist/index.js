@@ -290,16 +290,18 @@ var Sticky = function () {
   function Sticky(target, body) {
     _classCallCheck(this, Sticky);
 
+    this.placeholder = document.createElement('div');
     this.target = target;
     this.body = body;
+    this.body.appendChild(this.placeholder);
 
     this.position = window.getComputedStyle(this.target).position;
 
     this.bind();
-    this.updatePosition();
+    this.update();
   }
 
-  Sticky.prototype.updatePosition = function updatePosition() {
+  Sticky.prototype.update = function update() {
     if (this.checkIsHit()) {
       this.target.style.position = this.position;
     } else {
@@ -311,7 +313,9 @@ var Sticky = function () {
     var targetRect = this.target.getBoundingClientRect();
     var bodyRect = this.body.getBoundingClientRect();
 
-    return Math.abs(bodyRect.top) + bodyRect.height + targetRect.height > window.innerHeight;
+    this.placeholder.style.height = targetRect.height + 'px';
+
+    return window.innerHeight - bodyRect.bottom < targetRect.height;
   };
 
   Sticky.prototype.bind = function bind() {
@@ -320,7 +324,7 @@ var Sticky = function () {
     this.event = function () {
       _newArrowCheck(this, _this2);
 
-      return this.updatePosition();
+      return this.update();
     }.bind(this);
 
     addEventListener(window, this.event, 'resize', 'scroll');
