@@ -312,10 +312,11 @@ var Sticky = function () {
   Sticky.prototype.checkIsHit = function checkIsHit() {
     var targetRect = this.target.getBoundingClientRect();
     var bodyRect = this.body.getBoundingClientRect();
+    var height = targetRect.height;
 
-    this.placeholder.style.height = targetRect.height + 'px';
+    this.placeholder.style.height = height + 'px';
 
-    return window.innerHeight - bodyRect.bottom < targetRect.height;
+    return window.innerHeight - bodyRect.bottom - height < height;
   };
 
   Sticky.prototype.bind = function bind() {

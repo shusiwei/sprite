@@ -196,10 +196,11 @@ class Sticky {
   checkIsHit() {
     const targetRect = this.target.getBoundingClientRect();
     const bodyRect = this.body.getBoundingClientRect();
+    const height = targetRect.height;
 
-    this.placeholder.style.height = targetRect.height + 'px';
+    this.placeholder.style.height = height + 'px';
 
-    return window.innerHeight - bodyRect.bottom < targetRect.height;
+    return window.innerHeight - bodyRect.bottom - height < height;
   }
   bind() {
     this.event = () => this.update();
