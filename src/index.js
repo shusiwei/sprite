@@ -195,7 +195,7 @@ class Sticky {
     const targetRect = this.target.getBoundingClientRect();
     const bodyRect = this.body.getBoundingClientRect();
 
-    window.pageYOffset + bodyRect.bottom + targetRect.height > window.innerHeight;
+    return window.pageYOffset + bodyRect.bottom + targetRect.height > window.innerHeight;
   }
   bind() {
     this.event = () => this.updatePosition();
