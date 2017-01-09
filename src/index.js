@@ -200,7 +200,7 @@ class Sticky {
 
     this.placeholder.style.height = height + 'px';
 
-    return window.innerHeight - bodyRect.bottom - height < height;
+    return window.innerHeight - bodyRect.bottom >= height;
   }
   bind() {
     this.event = () => this.update();

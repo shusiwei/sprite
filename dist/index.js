@@ -316,7 +316,7 @@ var Sticky = function () {
 
     this.placeholder.style.height = height + 'px';
 
-    return window.innerHeight - bodyRect.bottom - height < height;
+    return window.innerHeight - bodyRect.bottom >= height;
   };
 
   Sticky.prototype.bind = function bind() {
