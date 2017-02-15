@@ -296,10 +296,10 @@ var Sticky = function () {
     this.position = window.getComputedStyle(this.target).position;
 
     this.bind();
-    this.updatePosition();
+    this.update();
   }
 
-  Sticky.prototype.updatePosition = function updatePosition() {
+  Sticky.prototype.update = function update() {
     if (this.checkIsHit()) {
       this.target.style.position = this.position;
     } else {
@@ -320,7 +320,7 @@ var Sticky = function () {
     this.event = function () {
       _newArrowCheck(this, _this2);
 
-      return this.updatePosition();
+      return this.update();
     }.bind(this);
 
     addEventListener(window, this.event, 'resize', 'scroll');

@@ -1,6 +1,6 @@
 {
   "name": "tiny-node",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A modern JavaScript utility library for browser",
   "main": "dist/index.js",
   "scripts": {

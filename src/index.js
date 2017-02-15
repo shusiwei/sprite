@@ -182,9 +182,9 @@ class Sticky {
     this.position = window.getComputedStyle(this.target).position;
 
     this.bind();
-    this.updatePosition();
+    this.update();
   }
-  updatePosition() {
+  update() {
     if (this.checkIsHit()) {
       this.target.style.position = this.position;
     } else {
@@ -198,7 +198,7 @@ class Sticky {
     return window.pageYOffset + bodyRect.bottom + targetRect.height > window.innerHeight;
   }
   bind() {
-    this.event = () => this.updatePosition();
+    this.event = () => this.update();
 
     addEventListener(window, this.event, 'resize', 'scroll');
   }
