@@ -54,7 +54,7 @@ const test = (type, value) => {
       return /^[\u4E00-\u9FA5a-zA-Z]{2,15}$/.test(value);
 
     case 'cellphone' :
-      return /^(13[0-9]{9}|15[012356789][0-9]{8}|18[0-9][0-9]{8}|14[57][0-9]{8}|17[01678][0-9]{8})$/.test(value);
+      return /^(13[0-9]{9}|15[012356789][0-9]{8}|18[0-9][0-9]{8}|14[57][0-9]{8}|17[0-9][0-9]{8})$/.test(value);
 
     case 'telephone' :
       return /^(0\d{2,3})?(\d{7,8})$/.test(value);
