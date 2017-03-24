@@ -146,7 +146,7 @@ var serialize = function () {
 
   _newArrowCheck(this, _this);
 
-  if (sources.length === 0) throw new Error('least one parameter is required');
+  if (sources.length === 0) return '';
 
   var result = [];
 

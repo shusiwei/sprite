@@ -84,7 +84,7 @@ const test = (type, value) => {
  * @return {String} queryString字符串
  */
 const serialize = (...sources) => {
-  if (sources.length === 0) throw new Error('least one parameter is required');
+  if (sources.length === 0) return '';
 
   const result = [];
 
